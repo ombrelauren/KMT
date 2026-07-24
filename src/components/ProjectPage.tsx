@@ -24,30 +24,38 @@ export default function ProjectPage({ project }: { project: Project }) {
     <div className="relative bg-black">
       {/* Media stack — sits above the credits panel and scrolls over it. */}
       <div className="relative z-10 bg-black">
-        {project.media.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex h-screen w-full">
-            {row.map((block, blockIndex) => (
-              <div
-                key={blockIndex}
-                className="relative h-full"
-                style={{ width: row.length === 2 ? "50%" : block.width === "half" ? "50%" : "100%" }}
-              >
-                {block.type === "video" ? (
-                  <video
-                    src={block.src}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  />
-                ) : (
-                  <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+        {project.media.map((row, rowIndex) => {
+          // Full-bleed rows fill the whole screen height (cropping top/bottom
+          // is fine there). Side-by-side (50/50) rows instead size their
+          // height to a 16:9 ratio, so the full width of each image stays
+          // visible instead of being cropped to fit a too-tall column.
+          const isFullBleed = row.length === 1 && row[0].width === "full";
+
+          return (
+            <div key={rowIndex} className={`flex w-full ${isFullBleed ? "h-screen" : ""}`}>
+              {row.map((block, blockIndex) => (
+                <div
+                  key={blockIndex}
+                  className={`relative ${isFullBleed ? "h-full" : "aspect-video"}`}
+                  style={{ width: row.length === 2 || block.width === "half" ? "50%" : "100%" }}
+                >
+                  {block.type === "video" ? (
+                    <video
+                      src={block.src}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
 
       {/* Credits panel — fixed underneath, revealed once the media stack has

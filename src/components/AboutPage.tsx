@@ -2,13 +2,6 @@ import { HEADER_HEIGHT } from "@/components/Header";
 import type { SiteSettings } from "@/lib/sanity";
 
 export default function AboutPage({ socialLinks }: { socialLinks: SiteSettings }) {
-  const SOCIAL_LINKS = [
-    { label: "Instagram", href: socialLinks.instagram ?? "#" },
-    { label: "TikTok", href: socialLinks.tiktok ?? "#" },
-    { label: "Vimeo", href: socialLinks.vimeo ?? "#" },
-    { label: "Youtube", href: socialLinks.youtube ?? "#" },
-  ];
-
   return (
     <div className="flex min-h-screen flex-col bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
       {/* This whole group (title + the 3 text blocks below) sizes to its own
@@ -48,8 +41,8 @@ export default function AboutPage({ socialLinks }: { socialLinks: SiteSettings }
 
         {/* Gap between block 2 and block 3 (social links) — adjust mt-16 */}
         <nav className="font-nav mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
-          {SOCIAL_LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="transition-colors hover:text-zinc-600">
+          {socialLinks.socialLinks.map((link) => (
+            <a key={link.label} href={link.url} className="transition-colors hover:text-zinc-600">
               {link.label}
             </a>
           ))}

@@ -114,16 +114,15 @@ export async function getProject(slug: string): Promise<Project | null> {
   return raw ? toProject(raw) : null;
 }
 
+export type SocialLink = { label: string; url: string };
+
 export type SiteSettings = {
-  instagram?: string;
-  tiktok?: string;
-  vimeo?: string;
-  youtube?: string;
+  socialLinks: SocialLink[];
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const settings = await sanityClient.fetch<SiteSettings | null>(
-    `*[_type == "siteSettings"][0]{instagram, tiktok, vimeo, youtube}`,
+  const settings = await sanityClient.fetch<{ socialLinks?: SocialLink[] } | null>(
+    `*[_type == "siteSettings"][0]{socialLinks}`,
   );
-  return settings ?? {};
+  return { socialLinks: settings?.socialLinks ?? [] };
 }
