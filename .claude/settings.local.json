@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes create-next-app@latest . --ts --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --skip-install=false --yes)",
+      "Bash(npx --yes create-next-app@latest kmt-website-tmp --ts --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --yes)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\faric\\\\Documents\\\\CLAUDE_CODE\\\\KMT_WEBSITE\\\\src\\\\app\\\\work\\\\[slug]\")",
+      "Bash(git config *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git add *)"
+    ]
+  }
+}

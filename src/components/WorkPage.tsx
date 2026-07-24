@@ -1,0 +1,98 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { projects, type ProjectCategory } from "@/data/projects";
+import { HEADER_HEIGHT } from "@/components/Header";
+
+const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
+  { label: "All", value: "all" },
+  { label: "Music Videos", value: "music-video" },
+  { label: "Commercials", value: "commercial" },
+  { label: "Photography", value: "photography" },
+];
+
+export default function WorkPage() {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [navWidth, setNavWidth] = useState<number | null>(null);
+  const [filter, setFilter] = useState<"all" | ProjectCategory>("all");
+
+  useEffect(() => {
+    const title = titleRef.current;
+    if (!title) return;
+
+    const updateWidth = () => setNavWidth(title.offsetWidth);
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(title);
+    return () => observer.disconnect();
+  }, []);
+
+  const filteredProjects =
+    filter === "all" ? projects : projects.filter((project) => project.category === filter);
+
+  return (
+    <div className="min-h-screen bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
+      <div
+        className="sticky z-20 flex w-full flex-col items-center bg-white pb-8 pt-title-top"
+        style={{ top: HEADER_HEIGHT }}
+      >
+        <h1
+          ref={titleRef}
+          className="font-heading text-9xl font-semibold uppercase leading-[1] tracking-tight text-black"
+        >
+          Work
+        </h1>
+
+        <nav
+          className="mt-0 flex items-center justify-between gap-x-4"
+          style={navWidth ? { width: navWidth } : undefined}
+        >
+          {FILTERS.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setFilter(item.value)}
+              className={`font-filter whitespace-nowrap text-xs font-semibold uppercase tracking-wide transition-colors ${
+                filter === item.value ? "text-black" : "text-zinc-400 hover:text-zinc-600"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      <div className="relative z-0 grid grid-cols-2">
+        {filteredProjects.map((project) => (
+          <Link
+            key={project.slug}
+            href={`/work/${project.slug}`}
+            className="group relative aspect-video overflow-hidden"
+          >
+            <Image
+              src={project.image}
+              alt={`${project.artist} — ${project.track}`}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+                {project.track}
+              </p>
+              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+                {project.artist}
+              </p>
+              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+                {project.year}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

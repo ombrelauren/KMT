@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+
+  /* Global page margin — the safe distance text content keeps from the
+     screen edges (header, page titles, body copy...). Change this ONE value
+     and every element using the `page` spacing utilities (px-page, py-page,
+     p-page, gap-page...) updates together. Images/grids are excluded on
+     purpose so they can stay edge-to-edge. */
+  --spacing-page: 20px;
+
+  /* Distance between the fixed header and a page's big title (WORK, ABOUT).
+     Shared by every page so they line up identically — change this ONE
+     value and both move together via the `pt-title-top` utility. */
+  --spacing-title-top: 20px;
+
+  /* Named type roles — swap the font loaded in src/app/fonts.ts and these
+     utility classes (font-heading, font-nav, font-body, font-filter,
+     font-caption) update everywhere automatically, no need to touch
+     individual components. */
+  --font-heading: var(--font-inter);
+  --font-nav: var(--font-inter);
+  --font-body: var(--font-inter);
+  --font-filter: var(--font-inter);
+  --font-caption: var(--font-inter);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
