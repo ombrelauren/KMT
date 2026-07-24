@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 
@@ -135,12 +134,14 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
             key={`${project.slug}-${i}`}
             className="relative h-full w-full flex-shrink-0 snap-center snap-always"
           >
-            <Image
-              src={project.image}
-              alt={`${project.artist} — ${project.track}`}
-              fill
-              priority
-              className="object-cover"
+            <video
+              src={project.coverVideo}
+              className="absolute inset-0 h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
             />
           </div>
         ))}

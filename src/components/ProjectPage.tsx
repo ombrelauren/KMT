@@ -30,7 +30,7 @@ export default function ProjectPage({ project }: { project: Project }) {
               <div
                 key={blockIndex}
                 className="relative h-full"
-                style={{ width: `${100 / row.length}%` }}
+                style={{ width: row.length === 2 ? "50%" : block.width === "half" ? "50%" : "100%" }}
               >
                 {block.type === "video" ? (
                   <video

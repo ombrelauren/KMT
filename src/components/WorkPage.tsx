@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { projects, type ProjectCategory } from "@/data/projects";
+import type { Project, ProjectCategory } from "@/data/projects";
 import { HEADER_HEIGHT } from "@/components/Header";
 
 const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
@@ -13,7 +13,7 @@ const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
   { label: "Photography", value: "photography" },
 ];
 
-export default function WorkPage() {
+export default function WorkPage({ projects }: { projects: Project[] }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [navWidth, setNavWidth] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | ProjectCategory>("all");
@@ -31,7 +31,9 @@ export default function WorkPage() {
   }, []);
 
   const filteredProjects =
-    filter === "all" ? projects : projects.filter((project) => project.category === filter);
+    filter === "all"
+      ? projects
+      : projects.filter((project) => project.categories.includes(filter));
 
   return (
     <div className="min-h-screen bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
@@ -73,7 +75,7 @@ export default function WorkPage() {
             className="group relative aspect-video overflow-hidden"
           >
             <Image
-              src={project.image}
+              src={project.coverImage}
               alt={`${project.artist} — ${project.track}`}
               fill
               className="object-cover"

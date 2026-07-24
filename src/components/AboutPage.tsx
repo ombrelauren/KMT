@@ -1,13 +1,14 @@
 import { HEADER_HEIGHT } from "@/components/Header";
+import type { SiteSettings } from "@/lib/sanity";
 
-const SOCIAL_LINKS = [
-  { label: "Instagram", href: "#" },
-  { label: "TikTok", href: "#" },
-  { label: "Vimeo", href: "#" },
-  { label: "Youtube", href: "#" },
-];
+export default function AboutPage({ socialLinks }: { socialLinks: SiteSettings }) {
+  const SOCIAL_LINKS = [
+    { label: "Instagram", href: socialLinks.instagram ?? "#" },
+    { label: "TikTok", href: socialLinks.tiktok ?? "#" },
+    { label: "Vimeo", href: socialLinks.vimeo ?? "#" },
+    { label: "Youtube", href: socialLinks.youtube ?? "#" },
+  ];
 
-export default function AboutPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
       {/* This whole group (title + the 3 text blocks below) sizes to its own

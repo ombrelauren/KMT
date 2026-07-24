@@ -1,6 +1,9 @@
 import ProjectShowcase from "@/components/ProjectShowcase";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/sanity";
 
-export default function Home() {
+export const revalidate = 30;
+
+export default async function Home() {
+  const projects = await getProjects();
   return <ProjectShowcase projects={projects} />;
 }
