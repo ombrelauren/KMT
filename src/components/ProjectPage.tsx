@@ -62,22 +62,26 @@ export default function ProjectPage({ project }: { project: Project }) {
           fully scrolled past. The spacer below keeps the page from scrolling
           any further than that. */}
       <div ref={creditsRef} className="fixed inset-x-0 bottom-0 z-0 bg-white px-page py-page">
-        <div className="flex gap-8">
-          <div className="flex w-64 flex-col gap-1 font-body text-left text-sm font-semibold uppercase tracking-wide text-black">
-            {project.credits.map((line) => (
-              <p key={line.label}>{line.label}</p>
-            ))}
-          </div>
-          <div className="flex flex-col gap-1 font-body text-left text-sm font-semibold uppercase tracking-wide text-black">
-            {project.credits.map((line) => (
-              <p key={line.label}>{line.value}</p>
-            ))}
-          </div>
+        {/* No gap/margin between rows on purpose — the line-height below is
+            the only spacing, so it matches a normal line break exactly. */}
+        <div className="font-body text-left text-sm font-semibold uppercase leading-[1.6] tracking-wide text-black">
+          {project.description.map((block, i) => {
+            if (block.type === "spacer") return <p key={i}>&nbsp;</p>;
+            if (block.type === "note") {
+              return (
+                <p key={i} className="font-normal">
+                  {block.text}
+                </p>
+              );
+            }
+            return (
+              <div key={i} className="flex gap-8">
+                <span className="w-64 shrink-0">{block.label}</span>
+                <span>{block.value}</span>
+              </div>
+            );
+          })}
         </div>
-
-        <p className="font-body mt-3 text-sm font-semibold uppercase tracking-wide text-black">
-          {project.creditsNote}
-        </p>
       </div>
 
       <div style={{ height: creditsHeight }} />

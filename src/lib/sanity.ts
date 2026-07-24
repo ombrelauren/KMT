@@ -1,6 +1,6 @@
 import { createClient, type SanityClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import type { CreditLine, MediaRow, Project, ProjectCategory } from "@/data/projects";
+import type { DescriptionBlock, MediaRow, Project, ProjectCategory } from "@/data/projects";
 
 // Project ID and dataset are not secrets — Sanity's own docs recommend
 // referencing them directly like this.
@@ -33,6 +33,11 @@ type RawMediaItem = {
   video?: { asset?: { _ref?: string } };
 };
 
+type RawDescriptionBlock =
+  | { _type: "creditLine"; label: string; value: string }
+  | { _type: "note"; text: string }
+  | { _type: "spacer" };
+
 type RawProject = {
   slug: { current: string };
   artist: string;
@@ -42,15 +47,23 @@ type RawProject = {
   coverImage: unknown;
   coverVideo?: { asset?: { _ref?: string } };
   media?: RawMediaItem[];
-  credits?: CreditLine[];
-  creditsNote?: string;
+  description?: RawDescriptionBlock[];
 };
 
 const projectFields = `
   artist, track, year, categories, coverImage, coverVideo, slug,
   media[]{ mediaType, width, image, video },
-  credits, creditsNote
+  description[]{ _type, label, value, text }
 `;
+
+function resolveDescription(blocks: RawDescriptionBlock[] | undefined): DescriptionBlock[] {
+  if (!blocks) return [];
+  return blocks.map((block) => {
+    if (block._type === "note") return { type: "note" as const, text: block.text };
+    if (block._type === "spacer") return { type: "spacer" as const };
+    return { type: "credit" as const, label: block.label, value: block.value };
+  });
+}
 
 // The flat list of items from Sanity is grouped into rows for rendering:
 // a "full" item is its own row; two consecutive "half" items pair up into
@@ -94,8 +107,7 @@ function toProject(raw: RawProject): Project {
     coverImage: urlFor(raw.coverImage).width(1600).height(900).url(),
     coverVideo: fileUrlFor(raw.coverVideo) ?? "",
     media: groupMedia(raw.media),
-    credits: raw.credits ?? [],
-    creditsNote: raw.creditsNote ?? "",
+    description: resolveDescription(raw.description),
   };
 }
 

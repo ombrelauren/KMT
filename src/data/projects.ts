@@ -9,7 +9,10 @@ export type MediaBlock = { type: "image" | "video"; src: string; width: "full" |
 // Two blocks = side by side, 50/50.
 export type MediaRow = MediaBlock[];
 
-export type CreditLine = { label: string; value: string };
+export type DescriptionBlock =
+  | { type: "credit"; label: string; value: string }
+  | { type: "note"; text: string }
+  | { type: "spacer" };
 
 export type Project = {
   slug: string;
@@ -20,6 +23,5 @@ export type Project = {
   coverVideo: string;
   categories: ProjectCategory[];
   media: MediaRow[];
-  credits: CreditLine[];
-  creditsNote: string;
+  description: DescriptionBlock[];
 };
