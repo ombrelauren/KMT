@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import { useTransitionNavigate } from "@/components/PageTransition";
@@ -177,17 +178,25 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
               key={`${project.slug}-${i}`}
               className="relative h-full w-full flex-shrink-0 snap-center snap-always"
             >
-              {inLoadRange && (
-                <video
-                  src={project.coverVideo}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                />
-              )}
+              {inLoadRange &&
+                (project.homeCover.type === "image" ? (
+                  <Image
+                    src={project.homeCover.src}
+                    alt={`${project.artist} — ${project.track}`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <video
+                    src={project.homeCover.src}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                  />
+                ))}
               <button
                 type="button"
                 aria-label={`Voir le projet ${project.artist} — ${project.track}`}

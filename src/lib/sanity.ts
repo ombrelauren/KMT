@@ -1,6 +1,13 @@
 import { createClient, type SanityClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import type { DescriptionBlock, MediaRow, Project, ProjectCategory, TextColor } from "@/data/projects";
+import type {
+  DescriptionBlock,
+  HomeCover,
+  MediaRow,
+  Project,
+  ProjectCategory,
+  TextColor,
+} from "@/data/projects";
 
 // Project ID and dataset are not secrets — Sanity's own docs recommend
 // referencing them directly like this.
@@ -45,7 +52,9 @@ type RawProject = {
   year: number;
   categories: ProjectCategory[];
   coverImage: unknown;
-  coverVideo?: { asset?: { _ref?: string } };
+  homeCoverType?: "image" | "video";
+  homeCoverVideo?: { asset?: { _ref?: string } };
+  homeCoverImage?: unknown;
   media?: RawMediaItem[];
   description?: RawDescriptionBlock[];
   homeHeaderColor?: TextColor;
@@ -53,11 +62,19 @@ type RawProject = {
 };
 
 const projectFields = `
-  artist, track, year, categories, coverImage, coverVideo, slug,
+  artist, track, year, categories, coverImage, slug,
+  homeCoverType, homeCoverVideo, homeCoverImage,
   media[]{ mediaType, width, image, video },
   description[]{ _type, label, value, text },
   homeHeaderColor, homeCaptionColor
 `;
+
+function resolveHomeCover(raw: RawProject): HomeCover {
+  if (raw.homeCoverType === "image") {
+    return { type: "image", src: urlFor(raw.homeCoverImage).width(1600).height(900).url() };
+  }
+  return { type: "video", src: fileUrlFor(raw.homeCoverVideo) ?? "" };
+}
 
 function resolveDescription(blocks: RawDescriptionBlock[] | undefined): DescriptionBlock[] {
   if (!blocks) return [];
@@ -108,7 +125,7 @@ function toProject(raw: RawProject): Project {
     year: raw.year,
     categories: raw.categories ?? [],
     coverImage: urlFor(raw.coverImage).width(1600).height(900).url(),
-    coverVideo: fileUrlFor(raw.coverVideo) ?? "",
+    homeCover: resolveHomeCover(raw),
     media: groupMedia(raw.media),
     description: resolveDescription(raw.description),
     homeHeaderColor: raw.homeHeaderColor ?? "white",

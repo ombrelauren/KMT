@@ -16,13 +16,15 @@ export type DescriptionBlock =
 
 export type TextColor = "white" | "black";
 
+export type HomeCover = { type: "image" | "video"; src: string };
+
 export type Project = {
   slug: string;
   artist: string;
   track: string;
   year: number;
   coverImage: string;
-  coverVideo: string;
+  homeCover: HomeCover;
   categories: ProjectCategory[];
   media: MediaRow[];
   description: DescriptionBlock[];
