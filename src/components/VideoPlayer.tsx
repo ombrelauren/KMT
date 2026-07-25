@@ -8,6 +8,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const volumeBarRef = useRef<HTMLDivElement>(null);
   const seekingRef = useRef(false);
 
   const [playing, setPlaying] = useState(true);
@@ -126,6 +127,25 @@ export default function VideoPlayer({ src, className }: { src: string; className
     window.addEventListener("pointerup", handleUp);
   };
 
+  const setVolumeFromClientY = (clientY: number) => {
+    const bar = volumeBarRef.current;
+    if (!bar) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (rect.bottom - clientY) / rect.height));
+    handleVolumeChange(ratio);
+  };
+
+  const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    setVolumeFromClientY(e.clientY);
+    const handleMove = (moveEvent: PointerEvent) => setVolumeFromClientY(moveEvent.clientY);
+    const handleUp = () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+    };
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+  };
+
   const toggleFullscreen = () => {
     const container = containerRef.current;
     if (!container) return;
@@ -168,7 +188,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
         <div
           ref={progressBarRef}
           onPointerDown={handleSeekPointerDown}
-          className="relative h-1 flex-1 cursor-pointer rounded-full bg-white/30"
+          className="relative h-0.5 flex-1 cursor-pointer rounded-full bg-white/30"
         >
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-white"
@@ -181,21 +201,26 @@ export default function VideoPlayer({ src, className }: { src: string; className
           onMouseEnter={() => setVolumeHovering(true)}
           onMouseLeave={() => setVolumeHovering(false)}
         >
+          {/* pb-3 (instead of a margin on the box below) keeps the hoverable
+              area continuous from the button up through the slider, so the
+              pointer never crosses a dead zone and loses hover state. */}
           <div
-            className={`absolute bottom-full left-1/2 mb-3 flex h-24 w-8 -translate-x-1/2 items-center justify-center rounded-md bg-black/80 transition-opacity duration-150 ${
+            className={`absolute bottom-full left-1/2 w-8 -translate-x-1/2 pb-3 transition-opacity duration-150 ${
               volumeHovering ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={muted ? 0 : volume}
-              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="accent-white"
-              style={{ width: 72, transform: "rotate(-90deg)" }}
-            />
+            <div className="flex h-24 items-center justify-center rounded-md bg-black/80 py-3">
+              <div
+                ref={volumeBarRef}
+                onPointerDown={handleVolumePointerDown}
+                className="relative h-full w-0.5 cursor-pointer rounded-full bg-white/30"
+              >
+                <div
+                  className="absolute inset-x-0 bottom-0 rounded-full bg-white"
+                  style={{ height: `${(muted ? 0 : volume) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
           <button
             type="button"
