@@ -3,7 +3,12 @@
 
 export type ProjectCategory = "music-video" | "film" | "commercial" | "photography";
 
-export type MediaBlock = { type: "image" | "video"; src: string; width: "full" | "half" };
+export type MediaBlock = {
+  type: "image" | "video";
+  src: string;
+  width: "full" | "half";
+  controls?: boolean;
+};
 
 // A row rendered on the project page. A single block = full width (100%).
 // Two blocks = side by side, 50/50.

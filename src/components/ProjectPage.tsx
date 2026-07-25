@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
+import VideoPlayer from "@/components/VideoPlayer";
 
 export default function ProjectPage({ project }: { project: Project }) {
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -40,14 +41,21 @@ export default function ProjectPage({ project }: { project: Project }) {
                   style={{ width: row.length === 2 || block.width === "half" ? "50%" : "100%" }}
                 >
                   {block.type === "video" ? (
-                    <video
-                      src={block.src}
-                      className="absolute inset-0 h-full w-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
+                    block.controls ? (
+                      <VideoPlayer
+                        src={block.src}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      <video
+                        src={block.src}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    )
                   ) : (
                     <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
                   )}

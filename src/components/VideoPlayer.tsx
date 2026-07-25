@@ -1,0 +1,265 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+const DEFAULT_VOLUME = 0.25;
+
+export default function VideoPlayer({ src, className }: { src: string; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const seekingRef = useRef(false);
+
+  const [playing, setPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [progress, setProgress] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [volumeHovering, setVolumeHovering] = useState(false);
+  const userPausedRef = useRef(false);
+
+  // Browsers block (or silently re-pause) autoplay-with-sound outside a
+  // user gesture, so we always start muted — which is reliably allowed —
+  // then try to unmute right away. If the browser rejects or reverts that,
+  // the "unexpected pause" handler below falls back to staying muted.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = DEFAULT_VOLUME;
+    video.muted = true;
+    video.play().then(() => {
+      video.muted = false;
+      setMuted(false);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handleTimeUpdate = () => {
+      if (seekingRef.current || !video.duration) return;
+      setProgress(video.currentTime / video.duration);
+    };
+    const handlePlay = () => setPlaying(true);
+    const handlePause = () => {
+      setPlaying(false);
+      // An unmuted video pausing itself (not via the pause button) means
+      // the browser's autoplay policy rejected it after the fact — retry
+      // muted rather than leaving playback stuck.
+      if (!userPausedRef.current && !video.muted) {
+        video.muted = true;
+        setMuted(true);
+        video.play().catch(() => {});
+      }
+      userPausedRef.current = false;
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+    } else {
+      userPausedRef.current = true;
+      video.pause();
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const nextMuted = !video.muted;
+    const wasPlaying = !video.paused;
+    video.muted = nextMuted;
+    setMuted(nextMuted);
+    if (!nextMuted && video.volume === 0) {
+      video.volume = DEFAULT_VOLUME;
+      setVolume(DEFAULT_VOLUME);
+    }
+    // Chrome pauses media that gets unmuted outside a tight user-gesture ->
+    // play() call, so re-assert play() synchronously within this handler.
+    if (wasPlaying) video.play().catch(() => {});
+  };
+
+  const handleVolumeChange = (value: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const wasPlaying = !video.paused;
+    video.volume = value;
+    video.muted = value === 0;
+    setVolume(value);
+    setMuted(value === 0);
+    if (wasPlaying) video.play().catch(() => {});
+  };
+
+  const seekToClientX = (clientX: number) => {
+    const video = videoRef.current;
+    const bar = progressBarRef.current;
+    if (!video || !bar || !video.duration) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    video.currentTime = ratio * video.duration;
+    setProgress(ratio);
+  };
+
+  const handleSeekPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    seekingRef.current = true;
+    seekToClientX(e.clientX);
+    const handleMove = (moveEvent: PointerEvent) => seekToClientX(moveEvent.clientX);
+    const handleUp = () => {
+      seekingRef.current = false;
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+    };
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+  };
+
+  const toggleFullscreen = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else container.requestFullscreen().catch(() => {});
+  };
+
+  const showBar = hovering || !playing;
+
+  return (
+    <div
+      ref={containerRef}
+      className="group relative h-full w-full bg-black"
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+    >
+      <video
+        ref={videoRef}
+        src={src}
+        className={className}
+        loop
+        playsInline
+        onClick={togglePlay}
+      />
+
+      <div
+        className={`absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
+          showBar ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={playing ? "Pause" : "Lecture"}
+          className="shrink-0 text-white"
+        >
+          {playing ? <PauseIcon /> : <PlayIcon />}
+        </button>
+
+        <div
+          ref={progressBarRef}
+          onPointerDown={handleSeekPointerDown}
+          className="relative h-1 flex-1 cursor-pointer rounded-full bg-white/30"
+        >
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-white"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+
+        <div
+          className="relative flex shrink-0 items-center"
+          onMouseEnter={() => setVolumeHovering(true)}
+          onMouseLeave={() => setVolumeHovering(false)}
+        >
+          <div
+            className={`absolute bottom-full left-1/2 mb-3 flex h-24 w-8 -translate-x-1/2 items-center justify-center rounded-md bg-black/80 transition-opacity duration-150 ${
+              volumeHovering ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
+          >
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={muted ? 0 : volume}
+              onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+              className="accent-white"
+              style={{ width: 72, transform: "rotate(-90deg)" }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "Activer le son" : "Couper le son"}
+            className="text-white"
+          >
+            {muted ? <VolumeMuteIcon /> : <VolumeOnIcon />}
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          aria-label="Plein écran"
+          className="shrink-0 text-white"
+        >
+          <FullscreenIcon />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function PauseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
+    </svg>
+  );
+}
+
+function VolumeOnIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 10v4h4l5 5V5L7 10H3z" />
+      <path d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12z" />
+      <path d="M14 4.13v2.07c2.35.75 4 2.99 4 5.8s-1.65 5.05-4 5.8v2.07c3.45-.83 6-3.95 6-7.87s-2.55-7.04-6-7.87z" />
+    </svg>
+  );
+}
+
+function VolumeMuteIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 10v4h4l5 5V5L7 10H3z" />
+      <line x1="16" y1="8" x2="22" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="22" y1="8" x2="16" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function FullscreenIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

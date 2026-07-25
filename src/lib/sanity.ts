@@ -35,7 +35,12 @@ export function fileUrlFor(asset: { asset?: { _ref?: string } } | undefined) {
 
 type RawMediaItem =
   | { _type: "mediaImage"; width: "full" | "half"; asset?: { _ref?: string } }
-  | { _type: "mediaVideo"; width: "full" | "half"; asset?: { _ref?: string } };
+  | {
+      _type: "mediaVideo";
+      width: "full" | "half";
+      asset?: { _ref?: string };
+      controls?: boolean;
+    };
 
 type RawDescriptionBlock =
   | { _type: "creditLine"; label: string; value: string }
@@ -61,7 +66,7 @@ type RawProject = {
 const projectFields = `
   artist, track, year, categories, coverImage, slug,
   homeCoverType, homeCoverVideo, homeCoverImage,
-  media[]{ _type, width, asset },
+  media[]{ _type, width, asset, controls },
   description[]{ _type, label, value, text },
   homeHeaderColor, homeCaptionColor
 `;
@@ -98,14 +103,24 @@ function groupMedia(rawItems: RawMediaItem[] | undefined): MediaRow[] {
     const item = items[i];
     const block =
       item._type === "mediaVideo"
-        ? { type: "video" as const, src: fileUrlFor(item) ?? "", width: item.width }
+        ? {
+            type: "video" as const,
+            src: fileUrlFor(item) ?? "",
+            width: item.width,
+            controls: item.controls ?? true,
+          }
         : { type: "image" as const, src: urlFor(item).url(), width: item.width };
 
     if (item.width === "half" && items[i + 1]?.width === "half") {
       const next = items[i + 1];
       const nextBlock =
         next._type === "mediaVideo"
-          ? { type: "video" as const, src: fileUrlFor(next) ?? "", width: next.width }
+          ? {
+              type: "video" as const,
+              src: fileUrlFor(next) ?? "",
+              width: next.width,
+              controls: next.controls ?? true,
+            }
           : { type: "image" as const, src: urlFor(next).url(), width: next.width };
       rows.push([block, nextBlock]);
       i += 2;
