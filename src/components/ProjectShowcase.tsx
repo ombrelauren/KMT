@@ -283,7 +283,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   onClick={() => jumpToCaption(i)}
                   disabled={isActive}
                   style={{ width: ITEM_WIDTH }}
-                  className={`text-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
+                  className={`text-caption flex shrink-0 flex-col items-center justify-center px-[4px] text-center uppercase transition-colors ${
                     isActive
                       ? activeColor === "black"
                         ? "text-black"

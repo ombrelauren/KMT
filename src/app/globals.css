@@ -50,7 +50,7 @@
 :root {
   /* Heading */
   --typo-heading-family: var(--font-inter);
-  --typo-heading-size: 128px;
+  --typo-heading-size: 96px;
   --typo-heading-leading: 1;
   --typo-heading-tracking: -0.025em;
   --typo-heading-weight: 600;
@@ -58,14 +58,14 @@
   /* Nav */
   --typo-nav-family: var(--font-inter);
   --typo-nav-size: 16px;
-  --typo-nav-leading: 1.5;
+  --typo-nav-leading: 1;
   --typo-nav-tracking: 0.025em;
   --typo-nav-weight: 600;
 
   /* Body */
   --typo-body-family: var(--font-inter);
   --typo-body-size: 16px;
-  --typo-body-leading: 1.2;
+  --typo-body-leading: 1.1;
   --typo-body-tracking: 0.025em;
   --typo-body-weight: 600;
 
@@ -85,8 +85,8 @@
 
   /* Credits */
   --typo-credits-family: var(--font-inter);
-  --typo-credits-size: 14px;
-  --typo-credits-leading: 1.6;
+  --typo-credits-size: 12px;
+  --typo-credits-leading: 1;
   --typo-credits-tracking: 0.025em;
   --typo-credits-weight: 600;
 }

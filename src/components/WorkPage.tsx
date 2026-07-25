@@ -27,12 +27,12 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
     <div className="min-h-screen bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
       <HeaderBackdrop />
       <div
-        className="sticky z-20 flex w-full flex-col items-center bg-white pb-8 pt-title-top"
+        className="sticky z-20 flex w-full flex-col items-center bg-white pb-[32px] pt-title-top"
         style={{ top: HEADER_HEIGHT }}
       >
         <h1 className="text-heading uppercase text-black">Work</h1>
 
-        <nav className="mt-0 flex items-center justify-center gap-x-8">
+        <nav className="mt-0 flex items-center justify-center gap-x-[32px]">
           {FILTERS.map((item) => (
             <button
               key={item.value}

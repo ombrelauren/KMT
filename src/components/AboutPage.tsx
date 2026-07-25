@@ -23,14 +23,14 @@ export default function AboutPage({ about }: { about: AboutContent }) {
           {/* Block 1: main text, from Sanity — each line is its own paragraph */}
           <div className="text-body max-w-[730px] uppercase text-black">
             {paragraphs.map((paragraph, i) => (
-              <p key={i} className={i > 0 ? "mt-6" : undefined}>
+              <p key={i} className={i > 0 ? "mt-[24px]" : undefined}>
                 {paragraph}
               </p>
             ))}
           </div>
 
-          {/* Gap between block 1 and block 2 (contact) — adjust mt-16 */}
-          <div className="text-body mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
+          {/* Gap between block 1 and block 2 (contact) — adjust mt-[64px] */}
+          <div className="text-body mt-[64px] flex w-full max-w-[730px] justify-between uppercase text-black">
             <div className="text-left">
               <p>{about.leftContact.name}</p>
               <a
@@ -51,8 +51,8 @@ export default function AboutPage({ about }: { about: AboutContent }) {
             </div>
           </div>
 
-          {/* Gap between block 2 and block 3 (social links) — adjust mt-16 */}
-          <nav className="text-body mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
+          {/* Gap between block 2 and block 3 (social links) — adjust mt-[64px] */}
+          <nav className="text-body mt-[64px] flex w-full max-w-[730px] justify-between uppercase text-black">
             {about.socialLinks.map((link) => (
               <a
                 key={link.label}

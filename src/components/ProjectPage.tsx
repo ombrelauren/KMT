@@ -116,8 +116,8 @@ export default function ProjectPage({ project }: { project: Project }) {
               );
             }
             return (
-              <div key={i} className="flex gap-8">
-                <span className="w-64 shrink-0">{block.label}</span>
+              <div key={i} className="flex gap-[32px]">
+                <span className="w-[256px] shrink-0">{block.label}</span>
                 <span>{block.value}</span>
               </div>
             );
