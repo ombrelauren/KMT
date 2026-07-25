@@ -69,7 +69,7 @@ export default function ProjectPage({ project }: { project: Project }) {
             if (block.type === "spacer") return <p key={i}>&nbsp;</p>;
             if (block.type === "note") {
               return (
-                <p key={i} className="font-normal">
+                <p key={i} className="whitespace-pre-line font-normal">
                   {block.text}
                 </p>
               );
