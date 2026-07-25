@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import VideoPlayer from "@/components/VideoPlayer";
 
@@ -109,23 +109,27 @@ export default function ProjectPage({ project }: { project: Project }) {
           fully scrolled past. The spacer below keeps the page from scrolling
           any further than that. */}
       <div ref={creditsRef} className="fixed inset-x-0 bottom-0 z-0 bg-white px-page py-page">
-        {/* No gap/margin between rows on purpose — the line-height below is
-            the only spacing, so it matches a normal line break exactly. */}
-        <div className="text-credits text-left uppercase text-black">
+        {/* Role/name pairs sit in a 2-column grid — first column sized to
+            fit whatever the widest role label actually is (never wastes
+            space on short ones, never crowds long ones), second column
+            takes the rest and wraps. Notes/spacers span both columns.
+            No row-gap on purpose — the line-height is the only spacing
+            between rows, so it matches a normal line break exactly. */}
+        <div className="text-credits grid grid-cols-[auto_1fr] gap-x-[96px] text-left uppercase text-black">
           {project.description.map((block, i) => {
-            if (block.type === "spacer") return <p key={i}>&nbsp;</p>;
+            if (block.type === "spacer") return <p key={i} className="col-span-2">&nbsp;</p>;
             if (block.type === "note") {
               return (
-                <p key={i} className="whitespace-pre-line">
+                <p key={i} className="col-span-2 whitespace-pre-line">
                   {block.text}
                 </p>
               );
             }
             return (
-              <div key={i} className="flex gap-[32px]">
-                <span className="w-[256px] shrink-0">{block.label}</span>
+              <Fragment key={i}>
+                <span>{block.label}</span>
                 <span>{block.value}</span>
-              </div>
+              </Fragment>
             );
           })}
         </div>

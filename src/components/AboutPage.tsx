@@ -33,46 +33,50 @@ export default function AboutPage({ about }: { about: AboutContent }) {
           </div>
 
           {/* Gap between block 1 and block 2 (contact) — adjust mt-[64px].
-              Below md (768px) these stack vertically and center — side by
-              side, "Jad Daccache" + "Tarek Daccache" (name, email each)
-              don't fit next to each other on a phone-width screen. */}
-          <div className="text-body mt-[64px] flex w-full max-w-[730px] flex-col items-center gap-[24px] uppercase text-black md:flex-row md:items-start md:justify-between md:gap-0">
-            <div className="text-center md:text-left">
-              <p>{about.leftContact.name}</p>
-              <a
-                href={`mailto:${about.leftContact.email}`}
-                className="transition-colors hover:text-zinc-600"
-              >
-                {about.leftContact.email}
-              </a>
-            </div>
-            <div className="text-center md:text-right">
-              <p>{about.rightContact.name}</p>
-              <a
-                href={`mailto:${about.rightContact.email}`}
-                className="transition-colors hover:text-zinc-600"
-              >
-                {about.rightContact.email}
-              </a>
+              @container: this row switches to stacked/centered based on
+              ITS OWN available width, not the viewport — independent from
+              the social row below, which has different content and so
+              needs a different threshold. */}
+          <div className="mt-[64px] w-full max-w-[730px] @container">
+            <div className="text-body flex flex-col items-center gap-[24px] uppercase text-black @min-[520px]:flex-row @min-[520px]:items-start @min-[520px]:justify-between @min-[520px]:gap-0">
+              <div className="text-center @min-[520px]:text-left">
+                <p>{about.leftContact.name}</p>
+                <a
+                  href={`mailto:${about.leftContact.email}`}
+                  className="transition-colors hover:text-zinc-600"
+                >
+                  {about.leftContact.email}
+                </a>
+              </div>
+              <div className="text-center @min-[520px]:text-right">
+                <p>{about.rightContact.name}</p>
+                <a
+                  href={`mailto:${about.rightContact.email}`}
+                  className="transition-colors hover:text-zinc-600"
+                >
+                  {about.rightContact.email}
+                </a>
+              </div>
             </div>
           </div>
 
           {/* Gap between block 2 and block 3 (social links) — adjust
-              mt-[64px]. Same stack-below-md reasoning as the contact block
-              above — 4 links side by side don't fit on a phone screen. */}
-          <nav className="text-body mt-[64px] flex w-full max-w-[730px] flex-col items-center gap-[16px] uppercase text-black md:flex-row md:justify-between md:gap-0">
-            {about.socialLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors hover:text-zinc-600"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
+              mt-[64px]. Own @container/threshold, same reasoning as above. */}
+          <div className="mt-[64px] w-full max-w-[730px] @container">
+            <nav className="text-body flex flex-col items-center gap-[16px] uppercase text-black @min-[420px]:flex-row @min-[420px]:justify-between @min-[420px]:gap-0">
+              {about.socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-zinc-600"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+          </div>
         </div>
       </div>
     </div>

@@ -185,8 +185,21 @@ export default function VideoPlayer({
   const toggleFullscreen = () => {
     const container = containerRef.current;
     if (!container) return;
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else container.requestFullscreen().catch(() => {});
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+      return;
+    }
+    // iOS Safari doesn't support the standard Fullscreen API on arbitrary
+    // elements (only Android/desktop browsers do) — it only ever fullscreens
+    // the <video> itself, through this older WebKit-specific method.
+    const video = videoRef.current as
+      | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
+      | null;
+    if (video?.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+      return;
+    }
+    container.requestFullscreen().catch(() => {});
   };
 
   const showBar = !playing || (hovering && active);
@@ -340,8 +353,12 @@ function ControlsBarContent({
         </div>
       </div>
 
+      {/* Volume needs hover-to-reveal + a precise drag, neither of which
+          work on touch — and phone/tablet users already have hardware
+          volume buttons — so this whole control is hidden on touch
+          devices instead of shown broken. */}
       <div
-        className="relative flex shrink-0 items-center"
+        className="relative hidden shrink-0 items-center [@media(pointer:fine)]:flex"
         onMouseEnter={() => setVolumeHovering(true)}
         onMouseLeave={() => setVolumeHovering(false)}
       >

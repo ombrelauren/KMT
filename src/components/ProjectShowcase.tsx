@@ -205,7 +205,12 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   }, [count]);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black">
+    // 100dvh (not 100vh) tracks the ACTUAL currently-visible viewport height
+    // on mobile, shrinking live when the browser's address/toolbar chrome is
+    // showing — so the caption (pinned to bottom-page below) always keeps
+    // its margin from whatever is really visible at the bottom of the
+    // screen, instead of sitting past it under a hidden-until-scroll bar.
+    <section className="relative h-dvh w-full overflow-hidden bg-black">
       {/* Background crossfades between projects instead of sliding — each
           loaded cover sits stacked in the same spot, fading in/out based on
           which one is active. */}
