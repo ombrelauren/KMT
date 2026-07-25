@@ -217,29 +217,36 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
         style={{ maskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)" }}
       >
         <div ref={captionTrackRef} className="flex">
-          {loopedProjects.map((project, i) => {
-            const isActive = i === activeAbsoluteIndex;
+          {(() => {
+            // The whole caption bar follows the ACTIVE project's chosen
+            // color — non-active captions are the same color, just dimmed,
+            // rather than an unrelated fixed gray.
+            const activeColor = loopedProjects[activeAbsoluteIndex]?.homeCaptionColor ?? "white";
+            const inactiveClass =
+              activeColor === "black"
+                ? "text-black/50 hover:text-black/70"
+                : "text-white/50 hover:text-white/70";
 
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => shiftBy(i - activeAbsoluteIndex)}
-                disabled={isActive}
-                style={{ width: ITEM_WIDTH }}
-                className={`font-caption flex shrink-0 flex-col items-center justify-center px-1 text-center leading-[1.1] uppercase ${
-                  isActive
-                    ? project.homeCaptionColor === "black"
-                      ? "text-black"
-                      : "text-white"
-                    : "text-zinc-500 transition-colors hover:text-zinc-300"
-                }`}
-              >
-                <span className="w-full truncate text-base font-semibold">{project.track}</span>
-                <span className="w-full truncate text-base font-medium">{project.artist}</span>
-              </button>
-            );
-          })}
+            return loopedProjects.map((project, i) => {
+              const isActive = i === activeAbsoluteIndex;
+
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => shiftBy(i - activeAbsoluteIndex)}
+                  disabled={isActive}
+                  style={{ width: ITEM_WIDTH }}
+                  className={`font-caption flex shrink-0 flex-col items-center justify-center px-1 text-center leading-[1.1] uppercase transition-colors ${
+                    isActive ? (activeColor === "black" ? "text-black" : "text-white") : inactiveClass
+                  }`}
+                >
+                  <span className="w-full truncate text-base font-semibold">{project.track}</span>
+                  <span className="w-full truncate text-base font-medium">{project.artist}</span>
+                </button>
+              );
+            });
+          })()}
         </div>
       </div>
     </section>
