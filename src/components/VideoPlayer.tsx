@@ -185,15 +185,23 @@ export default function VideoPlayer({ src, className }: { src: string; className
           {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
 
+        {/* The clickable/draggable hit area (h-4) is taller than the visible
+            bar (h-0.5) so dragging doesn't require pixel-precise aim. */}
         <div
           ref={progressBarRef}
           onPointerDown={handleSeekPointerDown}
-          className="relative h-0.5 flex-1 cursor-pointer rounded-full bg-white/30"
+          className="relative flex h-4 flex-1 cursor-pointer items-center"
         >
-          <div
-            className="absolute inset-y-0 left-0 rounded-full bg-white"
-            style={{ width: `${progress * 100}%` }}
-          />
+          <div className="relative h-0.5 w-full rounded-full bg-white/30">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-white"
+              style={{ width: `${progress * 100}%` }}
+            />
+            <div
+              className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+              style={{ left: `${progress * 100}%` }}
+            />
+          </div>
         </div>
 
         <div
@@ -205,19 +213,25 @@ export default function VideoPlayer({ src, className }: { src: string; className
               area continuous from the button up through the slider, so the
               pointer never crosses a dead zone and loses hover state. */}
           <div
-            className={`absolute bottom-full left-1/2 w-8 -translate-x-1/2 pb-3 transition-opacity duration-150 ${
+            className={`absolute bottom-full left-1/2 -translate-x-1/2 pb-3 transition-opacity duration-150 ${
               volumeHovering ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
-            <div className="flex h-24 items-center justify-center rounded-md bg-black/80 py-3">
-              <div
-                ref={volumeBarRef}
-                onPointerDown={handleVolumePointerDown}
-                className="relative h-full w-0.5 cursor-pointer rounded-full bg-white/30"
-              >
+            {/* Same widened-hit-area trick as the seek bar, rotated: w-4 is
+                the clickable width, w-0.5 inside it is the visible bar. */}
+            <div
+              ref={volumeBarRef}
+              onPointerDown={handleVolumePointerDown}
+              className="relative flex h-24 w-4 cursor-pointer items-center justify-center"
+            >
+              <div className="relative h-full w-0.5 rounded-full bg-white/30">
                 <div
                   className="absolute inset-x-0 bottom-0 rounded-full bg-white"
                   style={{ height: `${(muted ? 0 : volume) * 100}%` }}
+                />
+                <div
+                  className="absolute left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-white"
+                  style={{ bottom: `${(muted ? 0 : volume) * 100}%` }}
                 />
               </div>
             </div>
