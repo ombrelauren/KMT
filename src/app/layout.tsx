@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { inter } from "./fonts";
 import Header from "@/components/Header";
+import PageTransitionProvider from "@/components/PageTransition";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <Header />
-        {children}
+        <PageTransitionProvider>
+          <Header />
+          {children}
+        </PageTransitionProvider>
       </body>
     </html>
   );

@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { Project, ProjectCategory } from "@/data/projects";
 import { HEADER_HEIGHT } from "@/components/Header";
+import TransitionLink from "@/components/TransitionLink";
 
 const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
   { label: "All", value: "all" },
@@ -69,7 +69,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
 
       <div className="relative z-0 grid grid-cols-2">
         {filteredProjects.map((project) => (
-          <Link
+          <TransitionLink
             key={project.slug}
             href={`/work/${project.slug}`}
             className="group relative aspect-video overflow-hidden"
@@ -92,7 +92,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
                 {project.year}
               </p>
             </div>
-          </Link>
+          </TransitionLink>
         ))}
       </div>
     </div>

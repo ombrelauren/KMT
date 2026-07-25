@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import TransitionLink from "@/components/TransitionLink";
 
 // Keep in sync with --spacing-page in src/app/globals.css.
 export const PAGE_MARGIN = 20;
@@ -24,17 +24,17 @@ export default function Header() {
     >
       <div className="grid w-full grid-cols-3 items-start px-page">
         <nav className="justify-self-start">
-          <Link
+          <TransitionLink
             href="/work"
             className={`font-nav text-base font-semibold uppercase tracking-wide transition-colors ${
               isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
             }`}
           >
             Work
-          </Link>
+          </TransitionLink>
         </nav>
 
-        <Link href="/" className="justify-self-center">
+        <TransitionLink href="/" className="justify-self-center">
           <Image
             src="/logo.svg"
             alt="Logo"
@@ -43,17 +43,17 @@ export default function Header() {
             priority
             className={isHome ? "invert-0" : "invert"}
           />
-        </Link>
+        </TransitionLink>
 
         <nav className="justify-self-end">
-          <Link
+          <TransitionLink
             href="/about"
             className={`font-nav text-base font-semibold uppercase tracking-wide transition-colors ${
               isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
             }`}
           >
             About
-          </Link>
+          </TransitionLink>
         </nav>
       </div>
     </header>
