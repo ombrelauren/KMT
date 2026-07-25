@@ -159,13 +159,29 @@ export async function getHomeProjects(): Promise<Project[]> {
 
 export type SocialLink = { label: string; url: string };
 
-export type SiteSettings = {
+export type Contact = { name: string; email: string };
+
+export type AboutContent = {
+  mainText: string;
+  leftContact: Contact;
+  rightContact: Contact;
   socialLinks: SocialLink[];
 };
 
-export async function getSiteSettings(): Promise<SiteSettings> {
-  const settings = await sanityClient.fetch<{ socialLinks?: SocialLink[] } | null>(
-    `*[_type == "siteSettings"][0]{socialLinks}`,
-  );
-  return { socialLinks: settings?.socialLinks ?? [] };
+const emptyContact: Contact = { name: "", email: "" };
+
+export async function getAboutContent(): Promise<AboutContent> {
+  const about = await sanityClient.fetch<{
+    mainText?: string;
+    leftContact?: Contact;
+    rightContact?: Contact;
+    socialLinks?: SocialLink[];
+  } | null>(`*[_type == "siteSettings"][0]{mainText, leftContact, rightContact, socialLinks}`);
+
+  return {
+    mainText: about?.mainText ?? "",
+    leftContact: about?.leftContact ?? emptyContact,
+    rightContact: about?.rightContact ?? emptyContact,
+    socialLinks: about?.socialLinks ?? [],
+  };
 }

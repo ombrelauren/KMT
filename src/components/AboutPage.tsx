@@ -1,7 +1,12 @@
 import { HEADER_HEIGHT } from "@/components/Header";
-import type { SiteSettings } from "@/lib/sanity";
+import type { AboutContent } from "@/lib/sanity";
 
-export default function AboutPage({ socialLinks }: { socialLinks: SiteSettings }) {
+export default function AboutPage({ about }: { about: AboutContent }) {
+  const paragraphs = about.mainText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
   return (
     <div className="flex min-h-screen flex-col bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
       {/* This whole group (title + the 3 text blocks below) sizes to its own
@@ -13,35 +18,30 @@ export default function AboutPage({ socialLinks }: { socialLinks: SiteSettings }
           About
         </h1>
 
-        {/* Block 1: description + tagline + "Jad & Tarek" */}
+        {/* Block 1: main text, from Sanity — each line is its own paragraph */}
         <div className="font-body mt-24 max-w-[730px] text-base font-semibold uppercase leading-[1.2] tracking-wide text-black">
-          <p>
-            We work across music videos, films, and photography, producing projects throughout
-            Europe and the SWANA region. Combining a hands-on approach with a trusted network of
-            collaborators, we build teams around each project to ensure every production receives
-            the attention it deserves.
-          </p>
-
-          <p className="mt-6">We&apos;ll keep the conversation going, even if you Kutmytongue</p>
-
-          <p className="mt-6">Jad &amp; Tarek</p>
+          {paragraphs.map((paragraph, i) => (
+            <p key={i} className={i > 0 ? "mt-6" : undefined}>
+              {paragraph}
+            </p>
+          ))}
         </div>
 
         {/* Gap between block 1 and block 2 (contact) — adjust mt-16 */}
         <div className="font-body mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
           <div className="text-left">
-            <p>Jad Daccache</p>
-            <p className="font-body font-normal text-zinc-600">jad@kmtproduction.com</p>
+            <p>{about.leftContact.name}</p>
+            <p className="font-body font-normal text-zinc-600">{about.leftContact.email}</p>
           </div>
           <div className="text-right">
-            <p>Tarek Daccache</p>
-            <p className="font-body font-normal text-zinc-600">tarek@kmtproduction.com</p>
+            <p>{about.rightContact.name}</p>
+            <p className="font-body font-normal text-zinc-600">{about.rightContact.email}</p>
           </div>
         </div>
 
         {/* Gap between block 2 and block 3 (social links) — adjust mt-16 */}
         <nav className="font-nav mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
-          {socialLinks.socialLinks.map((link) => (
+          {about.socialLinks.map((link) => (
             <a key={link.label} href={link.url} className="transition-colors hover:text-zinc-600">
               {link.label}
             </a>
