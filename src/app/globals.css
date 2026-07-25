@@ -31,6 +31,16 @@
   --font-body: var(--font-inter);
   --font-filter: var(--font-inter);
   --font-caption: var(--font-inter);
+
+  /* Same idea, but for line-height (interlignage). Every place that stacks
+     two lines of the same kind of text (a big title, or a title+subtitle
+     pair like the home page caption and the Work page hover) uses one of
+     these named values via `leading-heading` / `leading-caption` /
+     `leading-body` instead of its own one-off number, so changing this ONE
+     line updates every one of them together. */
+  --leading-heading: 1;
+  --leading-caption: 1.1;
+  --leading-body: 1.2;
 }
 
 @media (prefers-color-scheme: dark) {

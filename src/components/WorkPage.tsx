@@ -43,7 +43,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
       >
         <h1
           ref={titleRef}
-          className="font-heading text-9xl font-semibold uppercase leading-[1] tracking-tight text-black"
+          className="font-heading text-9xl font-semibold uppercase leading-heading tracking-tight text-black"
         >
           Work
         </h1>
@@ -81,14 +81,14 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
               className="object-cover"
             />
             <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
                 {project.track}
               </p>
-              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+              <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
                 {project.artist}
               </p>
-              <p className="font-body text-base font-semibold uppercase tracking-wide text-white">
+              <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
                 {project.year}
               </p>
             </div>

@@ -14,12 +14,12 @@ export default function AboutPage({ about }: { about: AboutContent }) {
           tall screens simply shows up as empty space below it, at the
           bottom of the page. */}
       <div className="flex flex-col items-center px-page pt-title-top text-center">
-        <h1 className="font-heading text-9xl font-semibold uppercase leading-[1] tracking-tight text-black">
+        <h1 className="font-heading text-9xl font-semibold uppercase leading-heading tracking-tight text-black">
           About
         </h1>
 
         {/* Block 1: main text, from Sanity — each line is its own paragraph */}
-        <div className="font-body mt-24 max-w-[730px] text-base font-semibold uppercase leading-[1.2] tracking-wide text-black">
+        <div className="font-body leading-body mt-24 max-w-[730px] text-base font-semibold uppercase tracking-wide text-black">
           {paragraphs.map((paragraph, i) => (
             <p key={i} className={i > 0 ? "mt-6" : undefined}>
               {paragraph}

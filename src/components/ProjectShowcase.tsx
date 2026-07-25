@@ -237,7 +237,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   onClick={() => shiftBy(i - activeAbsoluteIndex)}
                   disabled={isActive}
                   style={{ width: ITEM_WIDTH }}
-                  className={`font-caption flex shrink-0 flex-col items-center justify-center px-1 text-center leading-[1.1] uppercase transition-colors ${
+                  className={`font-caption leading-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
                     isActive ? (activeColor === "black" ? "text-black" : "text-white") : inactiveClass
                   }`}
                 >
