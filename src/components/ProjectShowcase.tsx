@@ -13,7 +13,7 @@ const LOAD_RADIUS = 2;
 
 const REPEAT = 9;
 const MIDDLE_COPY = Math.floor(REPEAT / 2);
-const ITEM_WIDTH = 200;
+const ITEM_WIDTH = 250;
 
 export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const navigate = useTransitionNavigate();
@@ -253,7 +253,11 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   disabled={isActive}
                   style={{ width: ITEM_WIDTH }}
                   className={`text-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
-                    isActive ? (activeColor === "black" ? "text-black" : "text-white") : inactiveClass
+                    isActive
+                      ? activeColor === "black"
+                        ? "text-black"
+                        : "text-white"
+                      : `cursor-pointer ${inactiveClass}`
                   }`}
                 >
                   <span className="w-full truncate font-semibold">{project.track}</span>
