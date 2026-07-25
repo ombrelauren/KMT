@@ -9,13 +9,17 @@ export default function AboutPage({ about }: { about: AboutContent }) {
     .filter(Boolean);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
+    <div
+      className="flex min-h-screen flex-col justify-center bg-white"
+      style={{ paddingTop: HEADER_HEIGHT }}
+    >
       <HeaderBackdrop />
       {/* This whole group (title + the 3 text blocks below) sizes to its own
-          content and stays put — it never stretches. Any leftover height on
-          tall screens simply shows up as empty space below it, at the
-          bottom of the page. */}
-      <div className="flex flex-col items-center px-page pt-title-top text-center">
+          content and stays vertically centered in the space below the
+          header — the gap above it (header to title) always matches the
+          gap below it (social links to bottom of screen), at any screen
+          height. */}
+      <div className="flex flex-col items-center px-page text-center">
         <h1 className="text-heading uppercase text-black">About</h1>
 
         {/* Block 1: main text, from Sanity — each line is its own paragraph */}
