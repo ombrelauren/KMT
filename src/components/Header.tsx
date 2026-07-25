@@ -17,11 +17,10 @@ export default function Header() {
   const isHome = pathname === "/" || /^\/work\/[^/]+$/.test(pathname ?? "");
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-30 flex w-full items-start py-page ${
-        isHome ? "bg-transparent" : "bg-white"
-      }`}
-    >
+    // Always transparent — on Work/About the white page background behind
+    // it already does the job, so painting our own white fill here just
+    // causes a premature white flash during page transitions.
+    <header className="fixed inset-x-0 top-0 z-30 flex w-full items-start py-page bg-transparent">
       <div className="grid w-full grid-cols-3 items-start px-page">
         <nav className="justify-self-start">
           <TransitionLink
