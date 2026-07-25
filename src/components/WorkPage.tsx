@@ -32,7 +32,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
       >
         <h1 className="text-heading uppercase text-black">Work</h1>
 
-        <nav className="mt-0 flex items-center justify-center gap-x-[32px]">
+        <nav className="mt-[12px] flex items-center justify-center gap-x-[32px]">
           {FILTERS.map((item) => (
             <button
               key={item.value}
@@ -59,6 +59,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
               src={project.coverImage}
               alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
               fill
+              sizes="33vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50" />

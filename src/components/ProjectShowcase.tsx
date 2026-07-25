@@ -1,15 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import { useTransitionNavigate } from "@/components/PageTransition";
 import { useSetHomeAppearance } from "@/components/HomeAppearance";
 
 // How many slides on either side of the active one keep their video loaded.
 // Everything outside this window renders no <video> at all, so we're never
-// trying to autoplay every single copy of every project at once.
-const LOAD_RADIUS = 2;
+// trying to autoplay every single copy of every project at once. Kept small
+// since each loaded video streams/decodes continuously even while hidden —
+// a caption click far outside this window was never preloaded either way,
+// so it always has to start loading fresh on click regardless of this value.
+const LOAD_RADIUS = 1;
 
 const REPEAT = 9;
 const MIDDLE_COPY = Math.floor(REPEAT / 2);
@@ -38,7 +41,13 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const previousIndexTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const count = projects.length;
 
-  const loopedProjects = Array.from({ length: REPEAT }, () => projects).flat();
+  // Recomputing this 9x-repeated array on every render (e.g. on every scroll
+  // frame that updates activeAbsoluteIndex) would rebuild and re-map a large
+  // array for no reason, since `projects` itself essentially never changes.
+  const loopedProjects = useMemo(
+    () => Array.from({ length: REPEAT }, () => projects).flat(),
+    [projects],
+  );
 
   // Each project picks its own header/caption text color (to match its own
   // cover video), so the header (rendered outside this component) needs to
@@ -218,6 +227,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   src={project.homeCover.src}
                   alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
                   fill
+                  sizes="100vw"
                   className="object-cover"
                 />
               ) : (

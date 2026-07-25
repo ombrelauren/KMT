@@ -90,7 +90,13 @@ export default function ProjectPage({ project }: { project: Project }) {
                       />
                     )
                   ) : (
-                    <Image src={block.src} alt="" fill className="object-cover" />
+                    <Image
+                    src={block.src}
+                    alt=""
+                    fill
+                    sizes={row.length === 2 || block.width === "half" ? "50vw" : "100vw"}
+                    className="object-cover"
+                  />
                   )}
                 </div>
               ))}
