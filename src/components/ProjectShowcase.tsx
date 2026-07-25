@@ -27,6 +27,15 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const wheelLockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRoundedRef = useRef<number>(0);
   const [activeAbsoluteIndex, setActiveAbsoluteIndex] = useState(0);
+  // While a caption-click jump is animating, the scroll handler's own index
+  // tracking is suppressed (see jumpToCaption) so the background doesn't
+  // crossfade through every slide the scroll passes on its way there.
+  const suppressScrollTrackingRef = useRef(false);
+  // Kept mounted (fading out) alongside the new active slide for the
+  // duration of the crossfade, even if it falls outside LOAD_RADIUS after a
+  // long jump — otherwise it would just vanish instead of fading.
+  const [previousIndex, setPreviousIndex] = useState<number | null>(null);
+  const previousIndexTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const count = projects.length;
 
   const loopedProjects = Array.from({ length: REPEAT }, () => projects).flat();
@@ -51,7 +60,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
 
   const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 
-  const animateScrollTo = (targetLeft: number, duration = 500) => {
+  const animateScrollTo = (targetLeft: number, duration = 500, onComplete?: () => void) => {
     const track = trackRef.current;
     if (!track) return;
     if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
@@ -74,15 +83,34 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
       } else {
         scrollAnimationRef.current = null;
         track.style.scrollSnapType = "";
+        onComplete?.();
       }
     };
     scrollAnimationRef.current = requestAnimationFrame(step);
   };
 
-  const shiftBy = (offset: number) => {
+  const shiftBy = (offset: number, onComplete?: () => void) => {
     const track = trackRef.current;
     if (!track) return;
-    animateScrollTo(track.scrollLeft + offset * track.clientWidth);
+    animateScrollTo(track.scrollLeft + offset * track.clientWidth, undefined, onComplete);
+  };
+
+  // Caption clicks can jump many slides away — rather than crossfading
+  // through every slide the animated scroll passes on the way there, jump
+  // the active index (and thus the background crossfade) straight to the
+  // target, and keep the slide we're leaving mounted just long enough to
+  // fade out instead of popping out once it falls outside LOAD_RADIUS.
+  const jumpToCaption = (i: number) => {
+    if (i === activeAbsoluteIndex) return;
+    setPreviousIndex(activeAbsoluteIndex);
+    setActiveAbsoluteIndex(i);
+    lastRoundedRef.current = i;
+    suppressScrollTrackingRef.current = true;
+    shiftBy(i - activeAbsoluteIndex, () => {
+      suppressScrollTrackingRef.current = false;
+    });
+    if (previousIndexTimeoutRef.current) clearTimeout(previousIndexTimeoutRef.current);
+    previousIndexTimeoutRef.current = setTimeout(() => setPreviousIndex(null), 750);
   };
 
   useEffect(() => {
@@ -128,10 +156,12 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
       const progress = track.scrollLeft / slideWidth;
       updateCaptionTransform(progress);
 
-      const rounded = Math.round(progress);
-      if (rounded !== lastRoundedRef.current) {
-        lastRoundedRef.current = rounded;
-        setActiveAbsoluteIndex(rounded);
+      if (!suppressScrollTrackingRef.current) {
+        const rounded = Math.round(progress);
+        if (rounded !== lastRoundedRef.current) {
+          lastRoundedRef.current = rounded;
+          setActiveAbsoluteIndex(rounded);
+        }
       }
 
       if (scrollEndTimeout.current) clearTimeout(scrollEndTimeout.current);
@@ -160,6 +190,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
       if (scrollEndTimeout.current) clearTimeout(scrollEndTimeout.current);
       if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
       if (wheelLockRef.current) clearTimeout(wheelLockRef.current);
+      if (previousIndexTimeoutRef.current) clearTimeout(previousIndexTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
@@ -171,7 +202,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
           which one is active. */}
       <div className="absolute inset-0">
         {loopedProjects.map((project, i) => {
-          const inLoadRange = Math.abs(i - activeAbsoluteIndex) <= LOAD_RADIUS;
+          const inLoadRange = Math.abs(i - activeAbsoluteIndex) <= LOAD_RADIUS || i === previousIndex;
           if (!inLoadRange) return null;
           const isActive = i === activeAbsoluteIndex;
 
@@ -249,7 +280,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                 <button
                   key={i}
                   type="button"
-                  onClick={() => shiftBy(i - activeAbsoluteIndex)}
+                  onClick={() => jumpToCaption(i)}
                   disabled={isActive}
                   style={{ width: ITEM_WIDTH }}
                   className={`text-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
