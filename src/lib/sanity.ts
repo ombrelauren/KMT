@@ -34,8 +34,8 @@ export function fileUrlFor(asset: { asset?: { _ref?: string } } | undefined) {
 }
 
 type RawMediaItem =
-  | { _type: "mediaImage"; width: "full" | "half"; image?: unknown }
-  | { _type: "mediaVideo"; width: "full" | "half"; video?: { asset?: { _ref?: string } } };
+  | { _type: "mediaImage"; width: "full" | "half"; asset?: { _ref?: string } }
+  | { _type: "mediaVideo"; width: "full" | "half"; asset?: { _ref?: string } };
 
 type RawDescriptionBlock =
   | { _type: "creditLine"; label: string; value: string }
@@ -44,7 +44,7 @@ type RawDescriptionBlock =
 
 type RawProject = {
   slug: { current: string };
-  artist: string;
+  artist?: string;
   track: string;
   year: number;
   categories: ProjectCategory[];
@@ -61,7 +61,7 @@ type RawProject = {
 const projectFields = `
   artist, track, year, categories, coverImage, slug,
   homeCoverType, homeCoverVideo, homeCoverImage,
-  media[]{ _type, width, image, video },
+  media[]{ _type, width, asset },
   description[]{ _type, label, value, text },
   homeHeaderColor, homeCaptionColor
 `;
@@ -85,8 +85,12 @@ function resolveDescription(blocks: RawDescriptionBlock[] | undefined): Descript
 // The flat list of items from Sanity is grouped into rows for rendering:
 // a "full" item is its own row; two consecutive "half" items pair up into
 // one side-by-side row; a lone trailing "half" renders alone at 50% width.
-function groupMedia(items: RawMediaItem[] | undefined): MediaRow[] {
-  if (!items) return [];
+function groupMedia(rawItems: RawMediaItem[] | undefined): MediaRow[] {
+  if (!rawItems) return [];
+  // Media items created before the mediaImage/mediaVideo schema switch to
+  // native image/file types have no `asset` ref under the new shape — skip
+  // them rather than crash the whole page.
+  const items = rawItems.filter((item) => item.asset?._ref);
   const rows: MediaRow[] = [];
   let i = 0;
 
@@ -94,15 +98,15 @@ function groupMedia(items: RawMediaItem[] | undefined): MediaRow[] {
     const item = items[i];
     const block =
       item._type === "mediaVideo"
-        ? { type: "video" as const, src: fileUrlFor(item.video) ?? "", width: item.width }
-        : { type: "image" as const, src: urlFor(item.image).url(), width: item.width };
+        ? { type: "video" as const, src: fileUrlFor(item) ?? "", width: item.width }
+        : { type: "image" as const, src: urlFor(item).url(), width: item.width };
 
     if (item.width === "half" && items[i + 1]?.width === "half") {
       const next = items[i + 1];
       const nextBlock =
         next._type === "mediaVideo"
-          ? { type: "video" as const, src: fileUrlFor(next.video) ?? "", width: next.width }
-          : { type: "image" as const, src: urlFor(next.image).url(), width: next.width };
+          ? { type: "video" as const, src: fileUrlFor(next) ?? "", width: next.width }
+          : { type: "image" as const, src: urlFor(next).url(), width: next.width };
       rows.push([block, nextBlock]);
       i += 2;
     } else {
@@ -117,7 +121,7 @@ function groupMedia(items: RawMediaItem[] | undefined): MediaRow[] {
 function toProject(raw: RawProject): Project {
   return {
     slug: raw.slug.current,
-    artist: raw.artist,
+    artist: raw.artist ?? "",
     track: raw.track,
     year: raw.year,
     categories: raw.categories ?? [],

@@ -59,7 +59,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
           >
             <Image
               src={project.coverImage}
-              alt={`${project.artist} — ${project.track}`}
+              alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
               fill
               className="object-cover"
             />
@@ -68,9 +68,11 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
               <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
                 {project.track}
               </p>
-              <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
-                {project.artist}
-              </p>
+              {project.artist && (
+                <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
+                  {project.artist}
+                </p>
+              )}
               <p className="font-body leading-caption text-base font-semibold uppercase tracking-wide text-white">
                 {project.year}
               </p>

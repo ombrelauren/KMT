@@ -182,7 +182,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                 (project.homeCover.type === "image" ? (
                   <Image
                     src={project.homeCover.src}
-                    alt={`${project.artist} — ${project.track}`}
+                    alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
                     fill
                     className="object-cover"
                   />
@@ -199,7 +199,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                 ))}
               <button
                 type="button"
-                aria-label={`Voir le projet ${project.artist} — ${project.track}`}
+                aria-label={`Voir le projet ${project.artist ? `${project.artist} — ` : ""}${project.track}`}
                 onClick={() => navigate(`/work/${project.slug}`)}
                 className="absolute inset-0 cursor-pointer"
               />
@@ -242,7 +242,9 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   }`}
                 >
                   <span className="w-full truncate text-base font-semibold">{project.track}</span>
-                  <span className="w-full truncate text-base font-medium">{project.artist}</span>
+                  {project.artist && (
+                    <span className="w-full truncate text-base font-medium">{project.artist}</span>
+                  )}
                 </button>
               );
             });
