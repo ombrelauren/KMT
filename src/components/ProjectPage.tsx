@@ -69,37 +69,42 @@ export default function ProjectPage({ project }: { project: Project }) {
           }
 
           return (
-            <div key={rowIndex} className="flex w-full">
-              {row.map((block, blockIndex) => (
-                <div
-                  key={blockIndex}
-                  className="relative aspect-video"
-                  style={{ width: row.length === 2 || block.width === "half" ? "50%" : "100%" }}
-                >
-                  {block.type === "video" ? (
-                    block.controls ? (
-                      <VideoPlayer src={block.src} fit="cover" />
+            // Below md, half-width items stack full-width instead of
+            // sitting side by side — 50% of a phone screen is too narrow
+            // to make out, so the "half" setting only applies at md+.
+            <div key={rowIndex} className="flex w-full flex-col md:flex-row">
+              {row.map((block, blockIndex) => {
+                const isHalf = row.length === 2 || block.width === "half";
+                return (
+                  <div
+                    key={blockIndex}
+                    className={`relative aspect-video w-full ${isHalf ? "md:w-1/2" : ""}`}
+                  >
+                    {block.type === "video" ? (
+                      block.controls ? (
+                        <VideoPlayer src={block.src} fit="cover" />
+                      ) : (
+                        <video
+                          src={block.src}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                        />
+                      )
                     ) : (
-                      <video
+                      <Image
                         src={block.src}
-                        className="absolute inset-0 h-full w-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
+                        alt=""
+                        fill
+                        sizes={isHalf ? "(min-width: 768px) 50vw, 100vw" : "100vw"}
+                        className="object-cover"
                       />
-                    )
-                  ) : (
-                    <Image
-                    src={block.src}
-                    alt=""
-                    fill
-                    sizes={row.length === 2 || block.width === "half" ? "50vw" : "100vw"}
-                    className="object-cover"
-                  />
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           );
         })}

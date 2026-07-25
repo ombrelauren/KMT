@@ -32,7 +32,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
       >
         <h1 className="text-heading uppercase text-black">Work</h1>
 
-        <nav className="mt-[12px] flex items-center justify-center gap-x-[32px]">
+        <nav className="mt-[12px] flex flex-wrap items-center justify-center gap-x-[16px] gap-y-[8px] px-page md:gap-x-[32px]">
           {FILTERS.map((item) => (
             <button
               key={item.value}
@@ -48,7 +48,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
         </nav>
       </div>
 
-      <div className="relative z-0 grid grid-cols-3">
+      <div className="relative z-0 grid grid-cols-1 md:grid-cols-3">
         {filteredProjects.map((project) => (
           <TransitionLink
             key={project.slug}
@@ -59,7 +59,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
               src={project.coverImage}
               alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
               fill
-              sizes="33vw"
+              sizes="(min-width: 768px) 33vw, 100vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50" />
