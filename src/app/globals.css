@@ -10,13 +10,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
 
-  /* Global page margin — the safe distance text content keeps from the
-     screen edges (header, page titles, body copy...). Change this ONE value
-     and every element using the `page` spacing utilities (px-page, py-page,
-     p-page, gap-page...) updates together. Images/grids are excluded on
-     purpose so they can stay edge-to-edge. */
-  --spacing-page: 20px;
-
   /* Distance between the fixed header and a page's big title (WORK, ABOUT).
      Shared by every page so they line up identically — change this ONE
      value and both move together via the `pt-title-top` utility. */
@@ -28,6 +21,19 @@
   --leading-heading: 1;
   --leading-caption: 1.1;
   --leading-body: 1.2;
+}
+
+/* Not "inline" on purpose: this value needs to still be a live CSS variable
+   (not baked into the compiled `px-page` etc. utilities) so the mobile
+   override below in the @media block actually has something to override. */
+@theme {
+  /* Global page margin — the safe distance text content keeps from the
+     screen edges (header, page titles, body copy...). Change this ONE value
+     and every element using the `page` spacing utilities (px-page, py-page,
+     p-page, gap-page...) updates together on desktop. Images/grids are
+     excluded on purpose so they can stay edge-to-edge. For the mobile
+     value, see the @media block near the bottom of this file. */
+  --spacing-page: 20px;
 }
 
 /* ============================================================================
@@ -153,6 +159,30 @@
   line-height: var(--typo-hover-leading);
   letter-spacing: var(--typo-hover-tracking);
   font-weight: var(--typo-hover-weight);
+}
+
+/* ============================================================================
+   MOBILE OVERRIDES — below this screen width (768px, phones and small
+   tablets), these values take over instead of the desktop ones above.
+   Only SIZES live here (page margin, and each family's font-size) — font,
+   weight, line-height and letter-spacing are only declared once above, so
+   changing any of those (e.g. swapping Inter for another font) automatically
+   applies identically on both desktop and mobile, nothing to keep in sync.
+   Change the 768px value below to move where "mobile" starts/ends.
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  :root {
+    --spacing-page: 20px;
+
+    --typo-heading-size: 96px;
+    --typo-nav-size: 16px;
+    --typo-body-size: 16px;
+    --typo-filter-size: 12px;
+    --typo-caption-size: 16px;
+    --typo-credits-size: 16px;
+    --typo-hover-size: 14px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
