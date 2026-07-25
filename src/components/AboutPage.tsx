@@ -50,9 +50,15 @@ export default function AboutPage({ about }: { about: AboutContent }) {
         </div>
 
         {/* Gap between block 2 and block 3 (social links) — adjust mt-16 */}
-        <nav className="text-nav mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
+        <nav className="text-body mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
           {about.socialLinks.map((link) => (
-            <a key={link.label} href={link.url} className="transition-colors hover:text-zinc-600">
+            <a
+              key={link.label}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-zinc-600"
+            >
               {link.label}
             </a>
           ))}
