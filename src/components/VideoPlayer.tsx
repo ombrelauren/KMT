@@ -16,8 +16,24 @@ export default function VideoPlayer({ src, className }: { src: string; className
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
   const [progress, setProgress] = useState(0);
   const [hovering, setHovering] = useState(false);
+  const [active, setActive] = useState(true);
   const [volumeHovering, setVolumeHovering] = useState(false);
   const userPausedRef = useRef(false);
+  const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // The controls bar stays visible while the cursor is actually moving, and
+  // fades out after a couple seconds of stillness — same idea as YouTube.
+  const wakeUp = () => {
+    setActive(true);
+    if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+    idleTimeoutRef.current = setTimeout(() => setActive(false), 1500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+    };
+  }, []);
 
   // Browsers block (or silently re-pause) autoplay-with-sound outside a
   // user gesture, so we always start muted — which is reliably allowed —
@@ -153,14 +169,21 @@ export default function VideoPlayer({ src, className }: { src: string; className
     else container.requestFullscreen().catch(() => {});
   };
 
-  const showBar = hovering || !playing;
+  const showBar = !playing || (hovering && active);
 
   return (
     <div
       ref={containerRef}
       className="group relative h-full w-full bg-black"
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
+      onMouseEnter={() => {
+        setHovering(true);
+        wakeUp();
+      }}
+      onMouseMove={wakeUp}
+      onMouseLeave={() => {
+        setHovering(false);
+        if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
+      }}
     >
       <video
         ref={videoRef}
@@ -173,7 +196,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
 
       <div
         className={`absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
-          showBar ? "opacity-100" : "opacity-0"
+          showBar ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
         <button
