@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Project, ProjectCategory } from "@/data/projects";
 import { HEADER_HEIGHT } from "@/components/Header";
+import HeaderBackdrop from "@/components/HeaderBackdrop";
 import TransitionLink from "@/components/TransitionLink";
 
 const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
@@ -37,6 +38,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
 
   return (
     <div className="min-h-screen bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
+      <HeaderBackdrop />
       <div
         className="sticky z-20 flex w-full flex-col items-center bg-white pb-8 pt-title-top"
         style={{ top: HEADER_HEIGHT }}

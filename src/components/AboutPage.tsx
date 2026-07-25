@@ -1,4 +1,5 @@
 import { HEADER_HEIGHT } from "@/components/Header";
+import HeaderBackdrop from "@/components/HeaderBackdrop";
 import type { AboutContent } from "@/lib/sanity";
 
 export default function AboutPage({ about }: { about: AboutContent }) {
@@ -9,6 +10,7 @@ export default function AboutPage({ about }: { about: AboutContent }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
+      <HeaderBackdrop />
       {/* This whole group (title + the 3 text blocks below) sizes to its own
           content and stays put — it never stretches. Any leftover height on
           tall screens simply shows up as empty space below it, at the
