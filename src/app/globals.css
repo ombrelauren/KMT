@@ -45,6 +45,7 @@
      text-filter    → Work page category filter buttons
      text-caption   → home page carousel captions
      text-credits   → project page credits panel
+     text-hover     → Work page hover overlay (title/artist/year)
    ============================================================================ */
 
 :root {
@@ -85,10 +86,17 @@
 
   /* Credits */
   --typo-credits-family: var(--font-inter);
-  --typo-credits-size: 12px;
+  --typo-credits-size: 16px;
   --typo-credits-leading: 1;
   --typo-credits-tracking: 0.025em;
   --typo-credits-weight: 600;
+
+  /* Hover (Work page grid overlay) */
+  --typo-hover-family: var(--font-inter);
+  --typo-hover-size: 14px;
+  --typo-hover-leading: 1.1;
+  --typo-hover-tracking: 0.025em;
+  --typo-hover-weight: 600;
 }
 
 @utility text-heading {
@@ -137,6 +145,14 @@
   line-height: var(--typo-credits-leading);
   letter-spacing: var(--typo-credits-tracking);
   font-weight: var(--typo-credits-weight);
+}
+
+@utility text-hover {
+  font-family: var(--typo-hover-family);
+  font-size: var(--typo-hover-size);
+  line-height: var(--typo-hover-leading);
+  letter-spacing: var(--typo-hover-tracking);
+  font-weight: var(--typo-hover-weight);
 }
 
 @media (prefers-color-scheme: dark) {

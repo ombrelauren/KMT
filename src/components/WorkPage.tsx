@@ -64,15 +64,15 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
             />
             <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <p className="text-body leading-[1.1] uppercase text-white">
+              <p className="text-hover uppercase text-white">
                 {project.track}
               </p>
               {project.artist && (
-                <p className="text-body leading-[1.1] uppercase text-white">
+                <p className="text-hover uppercase text-white">
                   {project.artist}
                 </p>
               )}
-              <p className="text-body leading-[1.1] uppercase text-white">
+              <p className="text-hover uppercase text-white">
                 {project.year}
               </p>
             </div>
