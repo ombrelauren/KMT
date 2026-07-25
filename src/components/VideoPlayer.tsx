@@ -4,7 +4,20 @@ import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_VOLUME = 0.25;
 
-export default function VideoPlayer({ src, className }: { src: string; className?: string }) {
+export default function VideoPlayer({
+  src,
+  fit = "cover",
+  onAspectRatio,
+}: {
+  src: string;
+  // "cover" fills its container edge-to-edge, cropping top/bottom as needed
+  // (the usual case). "natural" instead renders at the video's own aspect
+  // ratio, full width, however tall that makes it — used for non-16:9
+  // clips so nothing gets cropped; the controls bar becomes sticky so it
+  // stays on screen while scrolling through a taller-than-viewport video.
+  fit?: "cover" | "natural";
+  onAspectRatio?: (ratio: number) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
@@ -48,6 +61,21 @@ export default function VideoPlayer({ src, className }: { src: string; className
       video.muted = false;
       setMuted(false);
     }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !onAspectRatio) return;
+
+    const reportRatio = () => {
+      if (video.videoWidth && video.videoHeight) {
+        onAspectRatio(video.videoWidth / video.videoHeight);
+      }
+    };
+    if (video.readyState >= 1) reportRatio();
+    video.addEventListener("loadedmetadata", reportRatio);
+    return () => video.removeEventListener("loadedmetadata", reportRatio);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -183,7 +211,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
   return (
     <div
       ref={containerRef}
-      className="group relative h-full w-full bg-black"
+      className={`group relative bg-black ${fit === "cover" ? "h-full w-full" : "w-full"}`}
       onMouseEnter={() => {
         setHovering(true);
         wakeUp();
@@ -197,16 +225,16 @@ export default function VideoPlayer({ src, className }: { src: string; className
       <video
         ref={videoRef}
         src={src}
-        className={className}
+        className={fit === "cover" ? "absolute inset-0 h-full w-full object-cover" : "block h-auto w-full"}
         loop
         playsInline
         onClick={togglePlay}
       />
 
       <div
-        className={`absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
-          showBar ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`inset-x-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
+          fit === "cover" ? "absolute bottom-0" : "sticky bottom-0"
+        } ${showBar ? "opacity-100" : "pointer-events-none opacity-0"}`}
       >
         <button
           type="button"

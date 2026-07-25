@@ -5,9 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import VideoPlayer from "@/components/VideoPlayer";
 
+const SIXTEEN_BY_NINE = 16 / 9;
+const isWidescreen = (ratio: number | undefined) =>
+  ratio == null || Math.abs(ratio - SIXTEEN_BY_NINE) < 0.05;
+
 export default function ProjectPage({ project }: { project: Project }) {
   const creditsRef = useRef<HTMLDivElement>(null);
   const [creditsHeight, setCreditsHeight] = useState(0);
+  // Video aspect ratio isn't known until the player reads it, keyed by row
+  // index so each full-bleed video's layout can switch once it's known.
+  const [videoRatios, setVideoRatios] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const el = creditsRef.current;
@@ -26,26 +33,86 @@ export default function ProjectPage({ project }: { project: Project }) {
       {/* Media stack — sits above the credits panel and scrolls over it. */}
       <div className="relative z-10 bg-black">
         {project.media.map((row, rowIndex) => {
-          // Full-bleed rows fill the whole screen height (cropping top/bottom
-          // is fine there). Side-by-side (50/50) rows instead size their
-          // height to a 16:9 ratio, so the full width of each image stays
-          // visible instead of being cropped to fit a too-tall column.
+          // Full-bleed rows fill the whole screen height when the media is
+          // 16:9 (cropping top/bottom is fine there). A non-16:9 full-bleed
+          // clip instead renders at its own natural ratio, full width, so
+          // nothing gets cropped — if that makes it taller than the screen,
+          // scrolling reveals the rest. Side-by-side (50/50) rows always
+          // size to a 16:9 ratio, unaffected by any of this.
           const isFullBleed = row.length === 1 && row[0].width === "full";
 
+          if (isFullBleed) {
+            const block = row[0];
+            const knownRatio = block.type === "image" ? block.aspectRatio : videoRatios[rowIndex];
+            const widescreen = isWidescreen(knownRatio);
+
+            if (block.type === "video") {
+              return (
+                <div key={rowIndex} className={widescreen ? "relative h-screen w-full" : "relative w-full"}>
+                  {block.controls ? (
+                    <VideoPlayer
+                      src={block.src}
+                      fit={widescreen ? "cover" : "natural"}
+                      onAspectRatio={(ratio) =>
+                        setVideoRatios((prev) => ({ ...prev, [rowIndex]: ratio }))
+                      }
+                    />
+                  ) : (
+                    <video
+                      src={block.src}
+                      className={
+                        widescreen ? "absolute inset-0 h-full w-full object-cover" : "block h-auto w-full"
+                      }
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      onLoadedMetadata={(e) => {
+                        const el = e.currentTarget;
+                        if (el.videoWidth && el.videoHeight) {
+                          setVideoRatios((prev) => ({ ...prev, [rowIndex]: el.videoWidth / el.videoHeight }));
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            }
+
+            if (widescreen) {
+              return (
+                <div key={rowIndex} className="relative h-screen w-full">
+                  <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
+                </div>
+              );
+            }
+
+            const ratio = block.aspectRatio ?? SIXTEEN_BY_NINE;
+            return (
+              <Image
+                key={rowIndex}
+                src={block.src}
+                alt=""
+                width={1600}
+                height={Math.round(1600 / ratio)}
+                sizes="100vw"
+                priority={rowIndex === 0}
+                className="block h-auto w-full"
+              />
+            );
+          }
+
           return (
-            <div key={rowIndex} className={`flex w-full ${isFullBleed ? "h-screen" : ""}`}>
+            <div key={rowIndex} className="flex w-full">
               {row.map((block, blockIndex) => (
                 <div
                   key={blockIndex}
-                  className={`relative ${isFullBleed ? "h-full" : "aspect-video"}`}
+                  className="relative aspect-video"
                   style={{ width: row.length === 2 || block.width === "half" ? "50%" : "100%" }}
                 >
                   {block.type === "video" ? (
                     block.controls ? (
-                      <VideoPlayer
-                        src={block.src}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
+                      <VideoPlayer src={block.src} fit="cover" />
                     ) : (
                       <video
                         src={block.src}
@@ -57,7 +124,7 @@ export default function ProjectPage({ project }: { project: Project }) {
                       />
                     )
                   ) : (
-                    <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
+                    <Image src={block.src} alt="" fill className="object-cover" />
                   )}
                 </div>
               ))}

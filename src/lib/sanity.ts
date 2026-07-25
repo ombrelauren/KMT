@@ -33,6 +33,19 @@ export function fileUrlFor(asset: { asset?: { _ref?: string } } | undefined) {
   return `https://cdn.sanity.io/files/idmbo52t/production/${id}.${extension}`;
 }
 
+// Image asset refs encode their real pixel dimensions — image-<id>-<w>x<h>-<ext>
+// — so the width/height ratio is known upfront, with no extra request.
+function imageAspectRatioFor(asset: { asset?: { _ref?: string } } | undefined) {
+  const ref = asset?.asset?._ref;
+  if (!ref) return undefined;
+  const match = ref.match(/-(\d+)x(\d+)-/);
+  if (!match) return undefined;
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (!width || !height) return undefined;
+  return width / height;
+}
+
 type RawMediaItem =
   | { _type: "mediaImage"; width: "full" | "half"; asset?: { _ref?: string } }
   | {
@@ -109,7 +122,12 @@ function groupMedia(rawItems: RawMediaItem[] | undefined): MediaRow[] {
             width: item.width,
             controls: item.controls ?? true,
           }
-        : { type: "image" as const, src: urlFor(item).url(), width: item.width };
+        : {
+            type: "image" as const,
+            src: urlFor(item).url(),
+            width: item.width,
+            aspectRatio: imageAspectRatioFor(item),
+          };
 
     if (item.width === "half" && items[i + 1]?.width === "half") {
       const next = items[i + 1];
@@ -121,7 +139,12 @@ function groupMedia(rawItems: RawMediaItem[] | undefined): MediaRow[] {
               width: next.width,
               controls: next.controls ?? true,
             }
-          : { type: "image" as const, src: urlFor(next).url(), width: next.width };
+          : {
+              type: "image" as const,
+              src: urlFor(next).url(),
+              width: next.width,
+              aspectRatio: imageAspectRatioFor(next),
+            };
       rows.push([block, nextBlock]);
       i += 2;
     } else {

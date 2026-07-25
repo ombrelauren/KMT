@@ -8,6 +8,9 @@ export type MediaBlock = {
   src: string;
   width: "full" | "half";
   controls?: boolean;
+  // Known upfront for images (read straight from the Sanity asset ref).
+  // Unknown for video until the player reads its real dimensions.
+  aspectRatio?: number;
 };
 
 // A row rendered on the project page. A single block = full width (100%).
