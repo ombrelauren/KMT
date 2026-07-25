@@ -248,8 +248,12 @@ export default function VideoPlayer({
         // Matches the video's own box exactly, so the sticky bar inside it
         // can only stick within that range — and, being absolutely
         // positioned here rather than following normal flow, it never adds
-        // its own height below the video.
-        <div className="pointer-events-none absolute inset-0">
+        // its own height below the video. flex/justify-end gives the bar a
+        // bottom-of-box static position, so it overlays the bottom edge
+        // right away instead of only once scrolled (sticky's own "stick to
+        // bottom" behavior only kicks in once scrolling would otherwise
+        // carry it past that point).
+        <div className="pointer-events-none absolute inset-0 flex flex-col justify-end">
           <div
             className={`sticky inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
               showBar ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
