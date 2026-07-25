@@ -173,15 +173,15 @@
 
 @media (max-width: 768px) {
   :root {
-    --spacing-page: 20px;
+    --spacing-page: 12px; /* desktop: 20px */
 
-    --typo-heading-size: 96px;
-    --typo-nav-size: 16px;
-    --typo-body-size: 16px;
-    --typo-filter-size: 12px;
-    --typo-caption-size: 16px;
-    --typo-credits-size: 16px;
-    --typo-hover-size: 14px;
+    --typo-heading-size: 48px; /* desktop: 96px */
+    --typo-nav-size: 14px; /* desktop: 16px */
+    --typo-body-size: 14px; /* desktop: 16px */
+    --typo-filter-size: 12px; /* desktop: 12px */
+    --typo-caption-size: 14px; /* desktop: 16px */
+    --typo-credits-size: 14px; /* desktop: 16px */
+    --typo-hover-size: 12px; /* desktop: 14px */
   }
 }
 
