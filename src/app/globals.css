@@ -22,25 +22,121 @@
      value and both move together via the `pt-title-top` utility. */
   --spacing-title-top: 20px;
 
-  /* Named type roles — swap the font loaded in src/app/fonts.ts and these
-     utility classes (font-heading, font-nav, font-body, font-filter,
-     font-caption) update everywhere automatically, no need to touch
-     individual components. */
-  --font-heading: var(--font-inter);
-  --font-nav: var(--font-inter);
-  --font-body: var(--font-inter);
-  --font-filter: var(--font-inter);
-  --font-caption: var(--font-inter);
-
-  /* Same idea, but for line-height (interlignage). Every place that stacks
-     two lines of the same kind of text (a big title, or a title+subtitle
-     pair like the home page caption and the Work page hover) uses one of
-     these named values via `leading-heading` / `leading-caption` /
-     `leading-body` instead of its own one-off number, so changing this ONE
-     line updates every one of them together. */
+  /* Escape hatches for one-off line-height overrides (see typography
+     section below for the main system) — kept around for the rare spot
+     that intentionally borrows another family's leading. */
   --leading-heading: 1;
   --leading-caption: 1.1;
   --leading-body: 1.2;
+}
+
+/* ============================================================================
+   TYPOGRAPHY — one block per type family. Each block holds every parameter
+   for that family: font, size, line-height (interlignage), letter-spacing
+   (espacement entre les lettres), weight (graisse). Change a value here and
+   every element using that family's class updates together.
+
+   Each family below has a matching `text-<name>` class that applies all
+   five properties at once — use ONE class instead of separate
+   font-size/leading/tracking classes:
+     text-heading   → big page titles (WORK, ABOUT)
+     text-nav       → header links, About page names/socials
+     text-body      → paragraphs, credits
+     text-filter    → Work page category filter buttons
+     text-caption   → home page carousel captions
+     text-credits   → project page credits panel
+   ============================================================================ */
+
+:root {
+  /* Heading */
+  --typo-heading-family: var(--font-inter);
+  --typo-heading-size: 128px;
+  --typo-heading-leading: 1;
+  --typo-heading-tracking: -0.025em;
+  --typo-heading-weight: 600;
+
+  /* Nav */
+  --typo-nav-family: var(--font-inter);
+  --typo-nav-size: 16px;
+  --typo-nav-leading: 1.5;
+  --typo-nav-tracking: 0.025em;
+  --typo-nav-weight: 600;
+
+  /* Body */
+  --typo-body-family: var(--font-inter);
+  --typo-body-size: 16px;
+  --typo-body-leading: 1.2;
+  --typo-body-tracking: 0.025em;
+  --typo-body-weight: 600;
+
+  /* Filter */
+  --typo-filter-family: var(--font-inter);
+  --typo-filter-size: 12px;
+  --typo-filter-leading: 1.3333;
+  --typo-filter-tracking: 0.025em;
+  --typo-filter-weight: 600;
+
+  /* Caption */
+  --typo-caption-family: var(--font-inter);
+  --typo-caption-size: 16px;
+  --typo-caption-leading: 1.1;
+  --typo-caption-tracking: 0em;
+  --typo-caption-weight: 600;
+
+  /* Credits */
+  --typo-credits-family: var(--font-inter);
+  --typo-credits-size: 14px;
+  --typo-credits-leading: 1.6;
+  --typo-credits-tracking: 0.025em;
+  --typo-credits-weight: 600;
+}
+
+@utility text-heading {
+  font-family: var(--typo-heading-family);
+  font-size: var(--typo-heading-size);
+  line-height: var(--typo-heading-leading);
+  letter-spacing: var(--typo-heading-tracking);
+  font-weight: var(--typo-heading-weight);
+}
+
+@utility text-nav {
+  font-family: var(--typo-nav-family);
+  font-size: var(--typo-nav-size);
+  line-height: var(--typo-nav-leading);
+  letter-spacing: var(--typo-nav-tracking);
+  font-weight: var(--typo-nav-weight);
+}
+
+@utility text-body {
+  font-family: var(--typo-body-family);
+  font-size: var(--typo-body-size);
+  line-height: var(--typo-body-leading);
+  letter-spacing: var(--typo-body-tracking);
+  font-weight: var(--typo-body-weight);
+}
+
+@utility text-filter {
+  font-family: var(--typo-filter-family);
+  font-size: var(--typo-filter-size);
+  line-height: var(--typo-filter-leading);
+  letter-spacing: var(--typo-filter-tracking);
+  font-weight: var(--typo-filter-weight);
+}
+
+@utility text-caption {
+  font-family: var(--typo-caption-family);
+  font-size: var(--typo-caption-size);
+  line-height: var(--typo-caption-leading);
+  letter-spacing: var(--typo-caption-tracking);
+  font-weight: var(--typo-caption-weight);
+}
+
+@utility text-credits {
+  font-family: var(--typo-credits-family);
+  font-size: var(--typo-credits-size);
+  line-height: var(--typo-credits-leading);
+  letter-spacing: var(--typo-credits-tracking);
+  font-weight: var(--typo-credits-weight);
 }
 
 @media (prefers-color-scheme: dark) {

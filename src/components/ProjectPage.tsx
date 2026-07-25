@@ -72,7 +72,7 @@ export default function ProjectPage({ project }: { project: Project }) {
       <div ref={creditsRef} className="fixed inset-x-0 bottom-0 z-0 bg-white px-page py-page">
         {/* No gap/margin between rows on purpose — the line-height below is
             the only spacing, so it matches a normal line break exactly. */}
-        <div className="font-body text-left text-sm font-semibold uppercase leading-[1.6] tracking-wide text-black">
+        <div className="text-credits text-left uppercase text-black">
           {project.description.map((block, i) => {
             if (block.type === "spacer") return <p key={i}>&nbsp;</p>;
             if (block.type === "note") {

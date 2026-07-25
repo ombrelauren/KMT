@@ -252,13 +252,13 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   onClick={() => shiftBy(i - activeAbsoluteIndex)}
                   disabled={isActive}
                   style={{ width: ITEM_WIDTH }}
-                  className={`font-caption leading-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
+                  className={`text-caption flex shrink-0 flex-col items-center justify-center px-1 text-center uppercase transition-colors ${
                     isActive ? (activeColor === "black" ? "text-black" : "text-white") : inactiveClass
                   }`}
                 >
-                  <span className="w-full truncate text-base font-semibold">{project.track}</span>
+                  <span className="w-full truncate font-semibold">{project.track}</span>
                   {project.artist && (
-                    <span className="w-full truncate text-base font-medium">{project.artist}</span>
+                    <span className="w-full truncate font-medium">{project.artist}</span>
                   )}
                 </button>
               );

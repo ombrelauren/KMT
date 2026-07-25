@@ -31,7 +31,7 @@ export default function Header() {
         <nav className="justify-self-start">
           <TransitionLink
             href="/work"
-            className={`font-nav text-base font-semibold uppercase tracking-wide transition-colors ${
+            className={`text-nav uppercase transition-colors ${
               isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
             }`}
           >
@@ -53,7 +53,7 @@ export default function Header() {
         <nav className="justify-self-end">
           <TransitionLink
             href="/about"
-            className={`font-nav text-base font-semibold uppercase tracking-wide transition-colors ${
+            className={`text-nav uppercase transition-colors ${
               isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
             }`}
           >

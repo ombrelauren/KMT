@@ -16,12 +16,10 @@ export default function AboutPage({ about }: { about: AboutContent }) {
           tall screens simply shows up as empty space below it, at the
           bottom of the page. */}
       <div className="flex flex-col items-center px-page pt-title-top text-center">
-        <h1 className="font-heading text-9xl font-semibold uppercase leading-heading tracking-tight text-black">
-          About
-        </h1>
+        <h1 className="text-heading uppercase text-black">About</h1>
 
         {/* Block 1: main text, from Sanity — each line is its own paragraph */}
-        <div className="font-body leading-body mt-24 max-w-[730px] text-base font-semibold uppercase tracking-wide text-black">
+        <div className="text-body mt-24 max-w-[730px] uppercase text-black">
           {paragraphs.map((paragraph, i) => (
             <p key={i} className={i > 0 ? "mt-6" : undefined}>
               {paragraph}
@@ -30,12 +28,12 @@ export default function AboutPage({ about }: { about: AboutContent }) {
         </div>
 
         {/* Gap between block 1 and block 2 (contact) — adjust mt-16 */}
-        <div className="font-body mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
+        <div className="text-body mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
           <div className="text-left">
             <p>{about.leftContact.name}</p>
             <a
               href={`mailto:${about.leftContact.email}`}
-              className="font-body leading-body text-black transition-colors hover:text-zinc-600"
+              className="transition-colors hover:text-zinc-600"
             >
               {about.leftContact.email}
             </a>
@@ -44,7 +42,7 @@ export default function AboutPage({ about }: { about: AboutContent }) {
             <p>{about.rightContact.name}</p>
             <a
               href={`mailto:${about.rightContact.email}`}
-              className="font-body leading-body text-black transition-colors hover:text-zinc-600"
+              className="transition-colors hover:text-zinc-600"
             >
               {about.rightContact.email}
             </a>
@@ -52,7 +50,7 @@ export default function AboutPage({ about }: { about: AboutContent }) {
         </div>
 
         {/* Gap between block 2 and block 3 (social links) — adjust mt-16 */}
-        <nav className="font-nav mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
+        <nav className="text-nav mt-16 flex w-full max-w-[730px] justify-between uppercase text-black">
           {about.socialLinks.map((link) => (
             <a key={link.label} href={link.url} className="transition-colors hover:text-zinc-600">
               {link.label}
