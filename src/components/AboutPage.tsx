@@ -33,11 +33,21 @@ export default function AboutPage({ about }: { about: AboutContent }) {
         <div className="font-body mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
           <div className="text-left">
             <p>{about.leftContact.name}</p>
-            <p className="font-body leading-body text-black">{about.leftContact.email}</p>
+            <a
+              href={`mailto:${about.leftContact.email}`}
+              className="font-body leading-body text-black transition-colors hover:text-zinc-600"
+            >
+              {about.leftContact.email}
+            </a>
           </div>
           <div className="text-right">
             <p>{about.rightContact.name}</p>
-            <p className="font-body leading-body text-black">{about.rightContact.email}</p>
+            <a
+              href={`mailto:${about.rightContact.email}`}
+              className="font-body leading-body text-black transition-colors hover:text-zinc-600"
+            >
+              {about.rightContact.email}
+            </a>
           </div>
         </div>
 

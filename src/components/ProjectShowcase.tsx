@@ -166,46 +166,64 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
-      <div
-        ref={trackRef}
-        className="absolute inset-0 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
+      {/* Background crossfades between projects instead of sliding — each
+          loaded cover sits stacked in the same spot, fading in/out based on
+          which one is active. */}
+      <div className="absolute inset-0">
         {loopedProjects.map((project, i) => {
           const inLoadRange = Math.abs(i - activeAbsoluteIndex) <= LOAD_RADIUS;
+          if (!inLoadRange) return null;
+          const isActive = i === activeAbsoluteIndex;
 
           return (
             <div
               key={`${project.slug}-${i}`}
-              className="relative h-full w-full flex-shrink-0 snap-center snap-always"
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                isActive ? "opacity-100" : "opacity-0"
+              }`}
             >
-              {inLoadRange &&
-                (project.homeCover.type === "image" ? (
-                  <Image
-                    src={project.homeCover.src}
-                    alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <video
-                    src={project.homeCover.src}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                  />
-                ))}
-              <button
-                type="button"
-                aria-label={`Voir le projet ${project.artist ? `${project.artist} — ` : ""}${project.track}`}
-                onClick={() => navigate(`/work/${project.slug}`)}
-                className="absolute inset-0 cursor-pointer"
-              />
+              {project.homeCover.type === "image" ? (
+                <Image
+                  src={project.homeCover.src}
+                  alt={project.artist ? `${project.artist} — ${project.track}` : project.track}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <video
+                  src={project.homeCover.src}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              )}
             </div>
           );
         })}
+      </div>
+
+      {/* Invisible scroll track — still drives wheel/snap navigation and the
+          click-to-navigate hit areas, just no longer shows the slides. */}
+      <div
+        ref={trackRef}
+        className="absolute inset-0 flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {loopedProjects.map((project, i) => (
+          <div
+            key={`${project.slug}-${i}`}
+            className="relative h-full w-full flex-shrink-0 snap-center snap-always"
+          >
+            <button
+              type="button"
+              aria-label={`Voir le projet ${project.artist ? `${project.artist} — ` : ""}${project.track}`}
+              onClick={() => navigate(`/work/${project.slug}`)}
+              className="absolute inset-0 cursor-pointer"
+            />
+          </div>
+        ))}
       </div>
 
       <div
