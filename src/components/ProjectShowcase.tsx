@@ -208,9 +208,6 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
         })}
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-black/70 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-48 bg-gradient-to-t from-black/85 to-transparent" />
-
       <div
         ref={captionContainerRef}
         className="absolute inset-x-page bottom-page z-10 overflow-hidden"

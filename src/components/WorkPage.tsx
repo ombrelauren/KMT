@@ -50,7 +50,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
         </nav>
       </div>
 
-      <div className="relative z-0 grid grid-cols-2">
+      <div className="relative z-0 grid grid-cols-3">
         {filteredProjects.map((project) => (
           <TransitionLink
             key={project.slug}

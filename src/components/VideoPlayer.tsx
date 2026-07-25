@@ -131,16 +131,22 @@ export default function VideoPlayer({ src, className }: { src: string; className
   };
 
   const handleSeekPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
     seekingRef.current = true;
     seekToClientX(e.clientX);
     const handleMove = (moveEvent: PointerEvent) => seekToClientX(moveEvent.clientX);
-    const handleUp = () => {
+    // Releasing the mouse should always end the drag — a stray pointercancel
+    // (fast movement, trackpad quirks, focus changes) must clean up too, or
+    // the bar keeps following the cursor until the next click "releases" it.
+    const stop = () => {
       seekingRef.current = false;
       window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
     };
     window.addEventListener("pointermove", handleMove);
-    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
   };
 
   const setVolumeFromClientY = (clientY: number) => {
@@ -152,14 +158,17 @@ export default function VideoPlayer({ src, className }: { src: string; className
   };
 
   const handleVolumePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
     setVolumeFromClientY(e.clientY);
     const handleMove = (moveEvent: PointerEvent) => setVolumeFromClientY(moveEvent.clientY);
-    const handleUp = () => {
+    const stop = () => {
       window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
     };
     window.addEventListener("pointermove", handleMove);
-    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
   };
 
   const toggleFullscreen = () => {
@@ -284,7 +293,7 @@ export default function VideoPlayer({ src, className }: { src: string; className
 
 function PlayIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M8 5v14l11-7z" />
     </svg>
   );
@@ -292,7 +301,7 @@ function PlayIcon() {
 
 function PauseIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
     </svg>
   );
@@ -300,7 +309,7 @@ function PauseIcon() {
 
 function VolumeOnIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M3 10v4h4l5 5V5L7 10H3z" />
       <path d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12z" />
       <path d="M14 4.13v2.07c2.35.75 4 2.99 4 5.8s-1.65 5.05-4 5.8v2.07c3.45-.83 6-3.95 6-7.87s-2.55-7.04-6-7.87z" />
@@ -310,7 +319,7 @@ function VolumeOnIcon() {
 
 function VolumeMuteIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M3 10v4h4l5 5V5L7 10H3z" />
       <line x1="16" y1="8" x2="22" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       <line x1="22" y1="8" x2="16" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -320,7 +329,7 @@ function VolumeMuteIcon() {
 
 function FullscreenIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
