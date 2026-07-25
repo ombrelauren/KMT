@@ -7,16 +7,14 @@ const DEFAULT_VOLUME = 0.25;
 export default function VideoPlayer({
   src,
   fit = "cover",
-  onAspectRatio,
 }: {
   src: string;
-  // "cover" fills its container edge-to-edge, cropping top/bottom as needed
-  // (the usual case). "natural" instead renders at the video's own aspect
-  // ratio, full width, however tall that makes it — used for non-16:9
-  // clips so nothing gets cropped; the controls bar becomes sticky so it
-  // stays on screen while scrolling through a taller-than-viewport video.
+  // "cover" fills its container edge-to-edge, cropping top/bottom as needed.
+  // "natural" instead renders at the video's own aspect ratio, full width,
+  // however tall that makes it — nothing ever gets cropped; the controls
+  // bar stays sticky to the bottom of the screen while scrolling through a
+  // taller-than-viewport video, without adding its own height below it.
   fit?: "cover" | "natural";
-  onAspectRatio?: (ratio: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -61,21 +59,6 @@ export default function VideoPlayer({
       video.muted = false;
       setMuted(false);
     }).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !onAspectRatio) return;
-
-    const reportRatio = () => {
-      if (video.videoWidth && video.videoHeight) {
-        onAspectRatio(video.videoWidth / video.videoHeight);
-      }
-    };
-    if (video.readyState >= 1) reportRatio();
-    video.addEventListener("loadedmetadata", reportRatio);
-    return () => video.removeEventListener("loadedmetadata", reportRatio);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -216,7 +199,15 @@ export default function VideoPlayer({
         setHovering(true);
         wakeUp();
       }}
-      onMouseMove={wakeUp}
+      onMouseMove={() => {
+        // If the cursor already sits over the player when it mounts (e.g.
+        // right after clicking into the project from a card under it), no
+        // "enter" event ever fires — only move events do — so hovering has
+        // to be set here too, or the bar never reveals until the cursor
+        // leaves and comes back.
+        setHovering(true);
+        wakeUp();
+      }}
       onMouseLeave={() => {
         setHovering(false);
         if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
@@ -231,91 +222,171 @@ export default function VideoPlayer({
         onClick={togglePlay}
       />
 
-      <div
-        className={`inset-x-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
-          fit === "cover" ? "absolute bottom-0" : "sticky bottom-0"
-        } ${showBar ? "opacity-100" : "pointer-events-none opacity-0"}`}
-      >
-        <button
-          type="button"
-          onClick={togglePlay}
-          aria-label={playing ? "Pause" : "Lecture"}
-          className="shrink-0 text-white"
-        >
-          {playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
-
-        {/* The clickable/draggable hit area (h-4) is taller than the visible
-            bar (h-0.5) so dragging doesn't require pixel-precise aim. */}
+      {fit === "cover" ? (
         <div
-          ref={progressBarRef}
-          onPointerDown={handleSeekPointerDown}
-          className="relative flex h-4 flex-1 cursor-pointer items-center"
+          className={`absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
+            showBar ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         >
-          <div className="relative h-0.5 w-full rounded-full bg-white/30">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-white"
-              style={{ width: `${progress * 100}%` }}
-            />
-            <div
-              className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
-              style={{ left: `${progress * 100}%` }}
-            />
-          </div>
+          <ControlsBarContent
+            playing={playing}
+            togglePlay={togglePlay}
+            progressBarRef={progressBarRef}
+            progress={progress}
+            handleSeekPointerDown={handleSeekPointerDown}
+            volumeHovering={volumeHovering}
+            setVolumeHovering={setVolumeHovering}
+            volumeBarRef={volumeBarRef}
+            handleVolumePointerDown={handleVolumePointerDown}
+            muted={muted}
+            volume={volume}
+            toggleMute={toggleMute}
+            toggleFullscreen={toggleFullscreen}
+          />
         </div>
-
-        <div
-          className="relative flex shrink-0 items-center"
-          onMouseEnter={() => setVolumeHovering(true)}
-          onMouseLeave={() => setVolumeHovering(false)}
-        >
-          {/* pb-3 (instead of a margin on the box below) keeps the hoverable
-              area continuous from the button up through the slider, so the
-              pointer never crosses a dead zone and loses hover state. */}
+      ) : (
+        // Matches the video's own box exactly, so the sticky bar inside it
+        // can only stick within that range — and, being absolutely
+        // positioned here rather than following normal flow, it never adds
+        // its own height below the video.
+        <div className="pointer-events-none absolute inset-0">
           <div
-            className={`absolute bottom-full left-1/2 -translate-x-1/2 pb-3 transition-opacity duration-150 ${
-              volumeHovering ? "opacity-100" : "pointer-events-none opacity-0"
+            className={`sticky inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 transition-opacity duration-200 ${
+              showBar ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
-            {/* Same widened-hit-area trick as the seek bar, rotated: w-4 is
-                the clickable width, w-0.5 inside it is the visible bar. */}
-            <div
-              ref={volumeBarRef}
-              onPointerDown={handleVolumePointerDown}
-              className="relative flex h-24 w-4 cursor-pointer items-center justify-center"
-            >
-              <div className="relative h-full w-0.5 rounded-full bg-white/30">
-                <div
-                  className="absolute inset-x-0 bottom-0 rounded-full bg-white"
-                  style={{ height: `${(muted ? 0 : volume) * 100}%` }}
-                />
-                <div
-                  className="absolute left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-white"
-                  style={{ bottom: `${(muted ? 0 : volume) * 100}%` }}
-                />
-              </div>
+            <ControlsBarContent
+              playing={playing}
+              togglePlay={togglePlay}
+              progressBarRef={progressBarRef}
+              progress={progress}
+              handleSeekPointerDown={handleSeekPointerDown}
+              volumeHovering={volumeHovering}
+              setVolumeHovering={setVolumeHovering}
+              volumeBarRef={volumeBarRef}
+              handleVolumePointerDown={handleVolumePointerDown}
+              muted={muted}
+              volume={volume}
+              toggleMute={toggleMute}
+              toggleFullscreen={toggleFullscreen}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ControlsBarContent({
+  playing,
+  togglePlay,
+  progressBarRef,
+  progress,
+  handleSeekPointerDown,
+  volumeHovering,
+  setVolumeHovering,
+  volumeBarRef,
+  handleVolumePointerDown,
+  muted,
+  volume,
+  toggleMute,
+  toggleFullscreen,
+}: {
+  playing: boolean;
+  togglePlay: () => void;
+  progressBarRef: React.RefObject<HTMLDivElement | null>;
+  progress: number;
+  handleSeekPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
+  volumeHovering: boolean;
+  setVolumeHovering: (value: boolean) => void;
+  volumeBarRef: React.RefObject<HTMLDivElement | null>;
+  handleVolumePointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
+  muted: boolean;
+  volume: number;
+  toggleMute: () => void;
+  toggleFullscreen: () => void;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={togglePlay}
+        aria-label={playing ? "Pause" : "Lecture"}
+        className="shrink-0 text-white"
+      >
+        {playing ? <PauseIcon /> : <PlayIcon />}
+      </button>
+
+      {/* The clickable/draggable hit area (h-4) is taller than the visible
+          bar (h-0.5) so dragging doesn't require pixel-precise aim. */}
+      <div
+        ref={progressBarRef}
+        onPointerDown={handleSeekPointerDown}
+        className="relative flex h-4 flex-1 cursor-pointer items-center"
+      >
+        <div className="relative h-0.5 w-full rounded-full bg-white/30">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-white"
+            style={{ width: `${progress * 100}%` }}
+          />
+          <div
+            className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+            style={{ left: `${progress * 100}%` }}
+          />
+        </div>
+      </div>
+
+      <div
+        className="relative flex shrink-0 items-center"
+        onMouseEnter={() => setVolumeHovering(true)}
+        onMouseLeave={() => setVolumeHovering(false)}
+      >
+        {/* pb-3 (instead of a margin on the box below) keeps the hoverable
+            area continuous from the button up through the slider, so the
+            pointer never crosses a dead zone and loses hover state. */}
+        <div
+          className={`absolute bottom-full left-1/2 -translate-x-1/2 pb-3 transition-opacity duration-150 ${
+            volumeHovering ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+        >
+          {/* Same widened-hit-area trick as the seek bar, rotated: w-4 is
+              the clickable width, w-0.5 inside it is the visible bar. */}
+          <div
+            ref={volumeBarRef}
+            onPointerDown={handleVolumePointerDown}
+            className="relative flex h-24 w-4 cursor-pointer items-center justify-center"
+          >
+            <div className="relative h-full w-0.5 rounded-full bg-white/30">
+              <div
+                className="absolute inset-x-0 bottom-0 rounded-full bg-white"
+                style={{ height: `${(muted ? 0 : volume) * 100}%` }}
+              />
+              <div
+                className="absolute left-1/2 h-2 w-2 -translate-x-1/2 translate-y-1/2 rounded-full bg-white"
+                style={{ bottom: `${(muted ? 0 : volume) * 100}%` }}
+              />
             </div>
           </div>
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={muted ? "Activer le son" : "Couper le son"}
-            className="text-white"
-          >
-            {muted ? <VolumeMuteIcon /> : <VolumeOnIcon />}
-          </button>
         </div>
-
         <button
           type="button"
-          onClick={toggleFullscreen}
-          aria-label="Plein écran"
-          className="shrink-0 text-white"
+          onClick={toggleMute}
+          aria-label={muted ? "Activer le son" : "Couper le son"}
+          className="text-white"
         >
-          <FullscreenIcon />
+          {muted ? <VolumeMuteIcon /> : <VolumeOnIcon />}
         </button>
       </div>
-    </div>
+
+      <button
+        type="button"
+        onClick={toggleFullscreen}
+        aria-label="Plein écran"
+        className="shrink-0 text-white"
+      >
+        <FullscreenIcon />
+      </button>
+    </>
   );
 }
 

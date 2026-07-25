@@ -6,15 +6,10 @@ import type { Project } from "@/data/projects";
 import VideoPlayer from "@/components/VideoPlayer";
 
 const SIXTEEN_BY_NINE = 16 / 9;
-const isWidescreen = (ratio: number | undefined) =>
-  ratio == null || Math.abs(ratio - SIXTEEN_BY_NINE) < 0.05;
 
 export default function ProjectPage({ project }: { project: Project }) {
   const creditsRef = useRef<HTMLDivElement>(null);
   const [creditsHeight, setCreditsHeight] = useState(0);
-  // Video aspect ratio isn't known until the player reads it, keyed by row
-  // index so each full-bleed video's layout can switch once it's known.
-  const [videoRatios, setVideoRatios] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const el = creditsRef.current;
@@ -33,57 +28,28 @@ export default function ProjectPage({ project }: { project: Project }) {
       {/* Media stack — sits above the credits panel and scrolls over it. */}
       <div className="relative z-10 bg-black">
         {project.media.map((row, rowIndex) => {
-          // Full-bleed rows fill the whole screen height when the media is
-          // 16:9 (cropping top/bottom is fine there). A non-16:9 full-bleed
-          // clip instead renders at its own natural ratio, full width, so
-          // nothing gets cropped — if that makes it taller than the screen,
-          // scrolling reveals the rest. Side-by-side (50/50) rows always
-          // size to a 16:9 ratio, unaffected by any of this.
+          // Full-bleed rows always render at the media's real aspect ratio,
+          // full width, never cropped — if that makes it taller than the
+          // screen, scrolling reveals the rest. Side-by-side (50/50) rows
+          // still size to a fixed 16:9 slot so a pair lines up cleanly.
           const isFullBleed = row.length === 1 && row[0].width === "full";
 
           if (isFullBleed) {
             const block = row[0];
-            const knownRatio = block.type === "image" ? block.aspectRatio : videoRatios[rowIndex];
-            const widescreen = isWidescreen(knownRatio);
 
             if (block.type === "video") {
-              return (
-                <div key={rowIndex} className={widescreen ? "relative h-screen w-full" : "relative w-full"}>
-                  {block.controls ? (
-                    <VideoPlayer
-                      src={block.src}
-                      fit={widescreen ? "cover" : "natural"}
-                      onAspectRatio={(ratio) =>
-                        setVideoRatios((prev) => ({ ...prev, [rowIndex]: ratio }))
-                      }
-                    />
-                  ) : (
-                    <video
-                      src={block.src}
-                      className={
-                        widescreen ? "absolute inset-0 h-full w-full object-cover" : "block h-auto w-full"
-                      }
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      onLoadedMetadata={(e) => {
-                        const el = e.currentTarget;
-                        if (el.videoWidth && el.videoHeight) {
-                          setVideoRatios((prev) => ({ ...prev, [rowIndex]: el.videoWidth / el.videoHeight }));
-                        }
-                      }}
-                    />
-                  )}
-                </div>
-              );
-            }
-
-            if (widescreen) {
-              return (
-                <div key={rowIndex} className="relative h-screen w-full">
-                  <Image src={block.src} alt="" fill priority={rowIndex === 0} className="object-cover" />
-                </div>
+              return block.controls ? (
+                <VideoPlayer key={rowIndex} src={block.src} fit="natural" />
+              ) : (
+                <video
+                  key={rowIndex}
+                  src={block.src}
+                  className="block h-auto w-full bg-black"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
               );
             }
 
