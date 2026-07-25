@@ -126,6 +126,15 @@ export async function getProject(slug: string): Promise<Project | null> {
   return raw ? toProject(raw) : null;
 }
 
+// Which projects show on the home page, and in what order, is curated
+// separately from the Work page's own project order.
+export async function getHomeProjects(): Promise<Project[]> {
+  const raw = await sanityClient.fetch<RawProject[]>(
+    `*[_type == "homePage"][0].featuredProjects[]->{ ${projectFields} }`,
+  );
+  return (raw ?? []).map(toProject);
+}
+
 export type SocialLink = { label: string; url: string };
 
 export type SiteSettings = {
