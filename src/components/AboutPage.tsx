@@ -33,11 +33,11 @@ export default function AboutPage({ about }: { about: AboutContent }) {
         <div className="font-body mt-16 flex w-full max-w-[730px] justify-between text-base font-semibold uppercase tracking-wide text-black">
           <div className="text-left">
             <p>{about.leftContact.name}</p>
-            <p className="font-body leading-body text-zinc-600">{about.leftContact.email}</p>
+            <p className="font-body leading-body text-black">{about.leftContact.email}</p>
           </div>
           <div className="text-right">
             <p>{about.rightContact.name}</p>
-            <p className="font-body font-normal text-zinc-600">{about.rightContact.email}</p>
+            <p className="font-body leading-body text-black">{about.rightContact.email}</p>
           </div>
         </div>
 
