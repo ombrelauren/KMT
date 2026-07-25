@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import TransitionLink from "@/components/TransitionLink";
+import { useHomeAppearance } from "@/components/HomeAppearance";
 
 // Keep in sync with --spacing-page in src/app/globals.css.
 export const PAGE_MARGIN = 20;
@@ -11,10 +12,15 @@ export const HEADER_HEIGHT = LOGO_SIZE + PAGE_MARGIN * 2;
 
 export default function Header() {
   const pathname = usePathname();
+  const { headerColor } = useHomeAppearance();
+  const isHomePage = pathname === "/";
+  const isProjectPage = /^\/work\/[^/]+$/.test(pathname ?? "");
   // Home and individual project pages show media edge-to-edge behind the
-  // header, so they need the transparent/white-text treatment; every other
-  // page has a plain white background and needs dark text.
-  const isHome = pathname === "/" || /^\/work\/[^/]+$/.test(pathname ?? "");
+  // header, so they need light/dark text rather than the plain dark text
+  // used everywhere else (which has a solid white page background). On the
+  // home page specifically, each project can choose white or black text to
+  // match its own cover video.
+  const isHome = isProjectPage || (isHomePage ? headerColor === "white" : false);
 
   return (
     // Always transparent — on Work/About the white page background behind

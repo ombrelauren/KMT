@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import { useTransitionNavigate } from "@/components/PageTransition";
+import { useSetHomeAppearance } from "@/components/HomeAppearance";
 
 // How many slides on either side of the active one keep their video loaded.
 // Everything outside this window renders no <video> at all, so we're never
@@ -15,6 +16,7 @@ const ITEM_WIDTH = 200;
 
 export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const navigate = useTransitionNavigate();
+  const setAppearance = useSetHomeAppearance();
   const trackRef = useRef<HTMLDivElement>(null);
   const captionContainerRef = useRef<HTMLDivElement>(null);
   const captionTrackRef = useRef<HTMLDivElement>(null);
@@ -27,6 +29,16 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const count = projects.length;
 
   const loopedProjects = Array.from({ length: REPEAT }, () => projects).flat();
+
+  // Each project picks its own header/caption text color (to match its own
+  // cover video), so the header (rendered outside this component) needs to
+  // be told which one is currently active.
+  useEffect(() => {
+    const project = loopedProjects[activeAbsoluteIndex];
+    if (!project) return;
+    setAppearance({ headerColor: project.homeHeaderColor, captionColor: project.homeCaptionColor });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAbsoluteIndex]);
 
   const updateCaptionTransform = (progress: number) => {
     const container = captionContainerRef.current;
@@ -207,7 +219,11 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                 disabled={isActive}
                 style={{ width: ITEM_WIDTH }}
                 className={`font-caption flex shrink-0 flex-col items-center justify-center px-1 text-center leading-[1.1] uppercase ${
-                  isActive ? "text-white" : "text-zinc-500 transition-colors hover:text-zinc-300"
+                  isActive
+                    ? project.homeCaptionColor === "black"
+                      ? "text-black"
+                      : "text-white"
+                    : "text-zinc-500 transition-colors hover:text-zinc-300"
                 }`}
               >
                 <span className="w-full truncate text-base font-semibold">{project.track}</span>

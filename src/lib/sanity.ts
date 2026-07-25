@@ -1,6 +1,6 @@
 import { createClient, type SanityClient } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import type { DescriptionBlock, MediaRow, Project, ProjectCategory } from "@/data/projects";
+import type { DescriptionBlock, MediaRow, Project, ProjectCategory, TextColor } from "@/data/projects";
 
 // Project ID and dataset are not secrets — Sanity's own docs recommend
 // referencing them directly like this.
@@ -48,12 +48,15 @@ type RawProject = {
   coverVideo?: { asset?: { _ref?: string } };
   media?: RawMediaItem[];
   description?: RawDescriptionBlock[];
+  homeHeaderColor?: TextColor;
+  homeCaptionColor?: TextColor;
 };
 
 const projectFields = `
   artist, track, year, categories, coverImage, coverVideo, slug,
   media[]{ mediaType, width, image, video },
-  description[]{ _type, label, value, text }
+  description[]{ _type, label, value, text },
+  homeHeaderColor, homeCaptionColor
 `;
 
 function resolveDescription(blocks: RawDescriptionBlock[] | undefined): DescriptionBlock[] {
@@ -108,6 +111,8 @@ function toProject(raw: RawProject): Project {
     coverVideo: fileUrlFor(raw.coverVideo) ?? "",
     media: groupMedia(raw.media),
     description: resolveDescription(raw.description),
+    homeHeaderColor: raw.homeHeaderColor ?? "white",
+    homeCaptionColor: raw.homeCaptionColor ?? "white",
   };
 }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { inter } from "./fonts";
 import Header from "@/components/Header";
 import PageTransitionProvider from "@/components/PageTransition";
+import HomeAppearanceProvider from "@/components/HomeAppearance";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,8 +19,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <PageTransitionProvider>
-          <Header />
-          {children}
+          <HomeAppearanceProvider>
+            <Header />
+            {children}
+          </HomeAppearanceProvider>
         </PageTransitionProvider>
       </body>
     </html>

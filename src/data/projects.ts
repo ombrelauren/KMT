@@ -14,6 +14,8 @@ export type DescriptionBlock =
   | { type: "note"; text: string }
   | { type: "spacer" };
 
+export type TextColor = "white" | "black";
+
 export type Project = {
   slug: string;
   artist: string;
@@ -24,4 +26,6 @@ export type Project = {
   categories: ProjectCategory[];
   media: MediaRow[];
   description: DescriptionBlock[];
+  homeHeaderColor: TextColor;
+  homeCaptionColor: TextColor;
 };
