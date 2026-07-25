@@ -1,7 +1,7 @@
 // The actual content now lives in Sanity (see src/lib/sanity.ts for the
 // fetch functions). This file only defines the shapes used across the site.
 
-export type ProjectCategory = "music-video" | "commercial" | "photography";
+export type ProjectCategory = "music-video" | "film" | "commercial" | "photography";
 
 export type MediaBlock = { type: "image" | "video"; src: string; width: "full" | "half" };
 

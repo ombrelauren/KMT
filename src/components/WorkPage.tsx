@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Project, ProjectCategory } from "@/data/projects";
 import { HEADER_HEIGHT } from "@/components/Header";
 import HeaderBackdrop from "@/components/HeaderBackdrop";
@@ -10,26 +10,13 @@ import TransitionLink from "@/components/TransitionLink";
 const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
   { label: "All", value: "all" },
   { label: "Music Videos", value: "music-video" },
+  { label: "Film", value: "film" },
   { label: "Commercials", value: "commercial" },
   { label: "Photography", value: "photography" },
 ];
 
 export default function WorkPage({ projects }: { projects: Project[] }) {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [navWidth, setNavWidth] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | ProjectCategory>("all");
-
-  useEffect(() => {
-    const title = titleRef.current;
-    if (!title) return;
-
-    const updateWidth = () => setNavWidth(title.offsetWidth);
-    updateWidth();
-
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(title);
-    return () => observer.disconnect();
-  }, []);
 
   const filteredProjects =
     filter === "all"
@@ -43,17 +30,11 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
         className="sticky z-20 flex w-full flex-col items-center bg-white pb-8 pt-title-top"
         style={{ top: HEADER_HEIGHT }}
       >
-        <h1
-          ref={titleRef}
-          className="font-heading text-9xl font-semibold uppercase leading-heading tracking-tight text-black"
-        >
+        <h1 className="font-heading text-9xl font-semibold uppercase leading-heading tracking-tight text-black">
           Work
         </h1>
 
-        <nav
-          className="mt-0 flex items-center justify-between gap-x-4"
-          style={navWidth ? { width: navWidth } : undefined}
-        >
+        <nav className="mt-0 flex items-center justify-center gap-x-8">
           {FILTERS.map((item) => (
             <button
               key={item.value}
