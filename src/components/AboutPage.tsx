@@ -19,7 +19,10 @@ export default function AboutPage({ about }: { about: AboutContent }) {
       <div className="flex flex-1 flex-col items-center px-page pt-title-top text-center">
         <h1 className="text-heading uppercase text-black">About</h1>
 
-        <div className="flex flex-1 flex-col items-center justify-center pb-[100px]">
+        {/* mt-[64px]: minimum gap kept between the title and the text block
+            below, even on a very short window where centering would
+            otherwise push them right next to each other. */}
+        <div className="mt-[64px] flex flex-1 flex-col items-center justify-center pb-[100px]">
           {/* Block 1: main text, from Sanity — each line is its own paragraph */}
           <div className="text-body max-w-[730px] uppercase text-black">
             {paragraphs.map((paragraph, i) => (
