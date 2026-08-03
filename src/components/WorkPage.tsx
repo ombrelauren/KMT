@@ -1,54 +1,55 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import type { Project, ProjectCategory } from "@/data/projects";
-import { HEADER_HEIGHT } from "@/components/Header";
-import HeaderBackdrop from "@/components/HeaderBackdrop";
+import { useEffect, useRef, useState } from "react";
+import type { Project } from "@/data/projects";
 import TransitionLink from "@/components/TransitionLink";
-
-const FILTERS: { label: string; value: "all" | ProjectCategory }[] = [
-  { label: "All", value: "all" },
-  { label: "Music Videos", value: "music-video" },
-  { label: "Film", value: "film" },
-  { label: "Commercials", value: "commercial" },
-  { label: "Photography", value: "photography" },
-];
+import { FADE_MS, HOLD_MS } from "@/components/PageTransition";
+import { useWorkFilter } from "@/components/WorkFilter";
 
 export default function WorkPage({ projects }: { projects: Project[] }) {
-  const [filter, setFilter] = useState<"all" | ProjectCategory>("all");
+  const filter = useWorkFilter();
+  // The grid keeps showing the OLD filter's results while the overlay
+  // fades in, and only swaps to the new filter once it's fully opaque —
+  // same "swap hidden behind full black" trick the page transition uses —
+  // otherwise the new grid is already in the DOM from the first frame and
+  // shows straight through the overlay while it's still fading in.
+  const [displayedFilter, setDisplayedFilter] = useState(filter);
+  const [flashing, setFlashing] = useState(false);
+  const previousFilterRef = useRef(filter);
+
+  // Depends only on `filter`, not `displayedFilter` — this same effect is
+  // what updates displayedFilter, so including it would make the effect
+  // re-fire (and cancel its own pending fade-out timeout) the moment the
+  // swap happens, leaving the overlay stuck fully opaque.
+  useEffect(() => {
+    if (previousFilterRef.current === filter) return;
+    previousFilterRef.current = filter;
+    setFlashing(true);
+    const swapTimeout = setTimeout(() => setDisplayedFilter(filter), FADE_MS);
+    const fadeOutTimeout = setTimeout(() => setFlashing(false), FADE_MS + HOLD_MS);
+    return () => {
+      clearTimeout(swapTimeout);
+      clearTimeout(fadeOutTimeout);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
 
   const filteredProjects =
-    filter === "all"
+    displayedFilter === "all"
       ? projects
-      : projects.filter((project) => project.categories.includes(filter));
+      : projects.filter((project) => project.categories.includes(displayedFilter));
 
   return (
-    <div className="min-h-screen bg-white" style={{ paddingTop: HEADER_HEIGHT }}>
-      <HeaderBackdrop />
-      <div
-        className="sticky z-20 flex w-full flex-col items-center bg-white pb-[32px] pt-title-top"
-        style={{ top: HEADER_HEIGHT }}
-      >
-        <h1 className="text-heading uppercase text-black">Work</h1>
-
-        <nav className="mt-[12px] flex flex-wrap items-center justify-center gap-x-[16px] gap-y-[8px] px-page md:gap-x-[32px]">
-          {FILTERS.map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setFilter(item.value)}
-              className={`text-filter whitespace-nowrap uppercase transition-colors ${
-                filter === item.value ? "text-black" : "text-zinc-400 hover:text-zinc-600"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      </div>
-
+    <div className="min-h-screen bg-white">
       <div className="relative z-0 grid grid-cols-1 md:grid-cols-3">
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-10 bg-white transition-opacity ${
+            flashing ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ transitionDuration: `${FADE_MS}ms` }}
+        />
         {filteredProjects.map((project) => (
           <TransitionLink
             key={project.slug}
@@ -68,7 +69,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
                 {project.track}
               </p>
               {project.artist && (
-                <p className="text-hover uppercase text-white">
+                <p className="text-hover font-artist uppercase text-white">
                   {project.artist}
                 </p>
               )}

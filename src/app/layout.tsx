@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { inter } from "./fonts";
+import { geist, karrik } from "./fonts";
 import Header from "@/components/Header";
 import PageTransitionProvider from "@/components/PageTransition";
 import HomeAppearanceProvider from "@/components/HomeAppearance";
+import WorkFilterProvider from "@/components/WorkFilter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,12 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" className={`${geist.variable} ${karrik.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <PageTransitionProvider>
           <HomeAppearanceProvider>
-            <Header />
-            {children}
+            <WorkFilterProvider>
+              <Header />
+              {children}
+            </WorkFilterProvider>
           </HomeAppearanceProvider>
         </PageTransitionProvider>
       </body>

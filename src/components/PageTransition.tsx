@@ -3,7 +3,13 @@
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
-const FADE_MS = 400;
+// Exported so other fades (e.g. the Work page's filter-change flash) can
+// match this same speed instead of drifting out of sync with their own
+// hardcoded duration.
+export const FADE_MS = 400;
+// How long to sit at fully opaque before fading back — just enough for the
+// content swap underneath to happen unseen, not a deliberate dead pause.
+export const HOLD_MS = 40;
 
 const TransitionContext = createContext<(href: string) => void>(() => {});
 
@@ -37,7 +43,7 @@ export default function PageTransitionProvider({ children }: { children: React.R
   useEffect(() => {
     if (!fading) return;
     pendingHref.current = null;
-    const timeout = setTimeout(() => setFading(false), 100);
+    const timeout = setTimeout(() => setFading(false), HOLD_MS);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -47,7 +53,11 @@ export default function PageTransitionProvider({ children }: { children: React.R
       {children}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-20 bg-black transition-opacity"
+        // Above the header (z-30) on purpose — the header now sometimes
+        // carries page-specific content (the Work page filters), which
+        // must disappear during the fade like everything else instead of
+        // floating on top of it.
+        className="pointer-events-none fixed inset-0 z-40 bg-black transition-opacity"
         style={{ opacity: fading ? 1 : 0, transitionDuration: `${FADE_MS}ms` }}
       />
     </TransitionContext.Provider>

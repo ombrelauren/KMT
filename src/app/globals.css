@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-geist);
 
   /* Distance between the fixed header and a page's big title (WORK, ABOUT).
      Shared by every page so they line up identically — change this ONE
@@ -52,57 +52,70 @@
      text-caption   → home page carousel captions
      text-credits   → project page credits panel
      text-hover     → Work page hover overlay (title/artist/year)
+
+   All seven default to Geist (the main typeface). Artist names use a
+   second typeface, Karrik, instead — add the `font-artist` class (defined
+   right after these, so it reliably wins over whichever text-* class is
+   also on that element) on top of the usual text-caption/text-hover class
+   for those specific spans. Karrik only ships one weight (Regular), so
+   font-artist always requests 400 regardless of the surrounding weight.
    ============================================================================ */
 
 :root {
   /* Heading */
-  --typo-heading-family: var(--font-inter);
+  --typo-heading-family: var(--font-geist);
   --typo-heading-size: 96px;
   --typo-heading-leading: 1;
   --typo-heading-tracking: -0.025em;
-  --typo-heading-weight: 600;
+  --typo-heading-weight: 500;
 
   /* Nav */
-  --typo-nav-family: var(--font-inter);
+  --typo-nav-family: var(--font-geist);
   --typo-nav-size: 16px;
   --typo-nav-leading: 1;
   --typo-nav-tracking: 0.025em;
-  --typo-nav-weight: 600;
+  --typo-nav-weight:500;
 
   /* Body */
-  --typo-body-family: var(--font-inter);
+  --typo-body-family: var(--font-geist);
   --typo-body-size: 16px;
   --typo-body-leading: 1.1;
   --typo-body-tracking: 0.025em;
-  --typo-body-weight: 600;
+  --typo-body-weight: 500;
 
   /* Filter */
-  --typo-filter-family: var(--font-inter);
-  --typo-filter-size: 12px;
+  --typo-filter-family: var(--font-geist);
+  --typo-filter-size: 14px;
   --typo-filter-leading: 1.3333;
   --typo-filter-tracking: 0.025em;
-  --typo-filter-weight: 600;
+  --typo-filter-weight: 500;
 
   /* Caption */
-  --typo-caption-family: var(--font-inter);
+  --typo-caption-family: var(--font-geist);
   --typo-caption-size: 16px;
   --typo-caption-leading: 1.1;
   --typo-caption-tracking: 0em;
-  --typo-caption-weight: 600;
+  --typo-caption-weight: 500;
 
   /* Credits */
-  --typo-credits-family: var(--font-inter);
+  --typo-credits-family: var(--font-geist);
   --typo-credits-size: 16px;
   --typo-credits-leading: 1;
   --typo-credits-tracking: 0.025em;
-  --typo-credits-weight: 600;
+  --typo-credits-weight: 500;
 
   /* Hover (Work page grid overlay) */
-  --typo-hover-family: var(--font-inter);
+  --typo-hover-family: var(--font-geist);
   --typo-hover-size: 14px;
   --typo-hover-leading: 1.1;
   --typo-hover-tracking: 0.025em;
-  --typo-hover-weight: 600;
+  --typo-hover-weight: 500;
+
+  /* Artist name scale (Karrik). Karrik's letters sit visually smaller than
+     Geist's at the same pixel size, so this scales the artist name's
+     font-size up relative to whatever size it inherits (text-caption or
+     text-hover) to match the track title's height. 1 = no change. */
+  --typo-artist-scale: 1.1;
 }
 
 @utility text-heading {
@@ -161,6 +174,17 @@
   font-weight: var(--typo-hover-weight);
 }
 
+/* Artist names only. Declared after the text-* utilities above on purpose:
+   within Tailwind's utilities layer, a later rule wins a tie between two
+   single-class selectors, so putting this class alongside e.g. text-hover
+   on the same element reliably overrides just its font/weight, leaving
+   that family's size/leading/tracking untouched. */
+@utility font-artist {
+  font-family: var(--font-karrik);
+  font-weight: 400;
+  font-size: calc(1em * var(--typo-artist-scale));
+}
+
 /* ============================================================================
    MOBILE OVERRIDES — below this screen width (768px, phones and small
    tablets), these values take over instead of the desktop ones above.
@@ -195,5 +219,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist), Arial, Helvetica, sans-serif;
 }

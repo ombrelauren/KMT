@@ -272,48 +272,45 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
         ))}
       </div>
 
+      {/* Narrowed to exactly one caption's width and centered, instead of
+          spanning the page — so only the active project's title/artist is
+          ever visible. Neighbors still slide through this window during a
+          transition (the same translateX track as before); the gradient
+          mask fades them out softly at the window's own edges rather than
+          hard-clipping mid-word, and does so regardless of how wide any
+          given title/artist pair happens to be, since it fades the window
+          itself, not the text. Always white, regardless of the project's
+          homeCaptionColor (only the header still uses that). */}
       <div
         ref={captionContainerRef}
-        className="absolute inset-x-page bottom-page z-10 overflow-hidden"
-        style={{ maskImage: "linear-gradient(to right, transparent, black 20%, black 80%, transparent)" }}
+        className="absolute bottom-page left-1/2 z-10 -translate-x-1/2 overflow-hidden"
+        style={{
+          width: ITEM_WIDTH,
+          maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)",
+        }}
       >
         <div ref={captionTrackRef} className="flex">
-          {(() => {
-            // The whole caption bar follows the ACTIVE project's chosen
-            // color — non-active captions are the same color, just dimmed,
-            // rather than an unrelated fixed gray.
-            const activeColor = loopedProjects[activeAbsoluteIndex]?.homeCaptionColor ?? "white";
-            const inactiveClass =
-              activeColor === "black"
-                ? "text-black/50 hover:text-black/70"
-                : "text-white/50 hover:text-white/70";
+          {loopedProjects.map((project, i) => {
+            const isActive = i === activeAbsoluteIndex;
 
-            return loopedProjects.map((project, i) => {
-              const isActive = i === activeAbsoluteIndex;
-
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => jumpToCaption(i)}
-                  disabled={isActive}
-                  style={{ width: ITEM_WIDTH }}
-                  className={`text-caption flex shrink-0 flex-col items-center justify-center px-[4px] text-center uppercase transition-colors ${
-                    isActive
-                      ? activeColor === "black"
-                        ? "text-black"
-                        : "text-white"
-                      : `cursor-pointer ${inactiveClass}`
-                  }`}
-                >
-                  <span className="w-full truncate font-semibold">{project.track}</span>
-                  {project.artist && (
-                    <span className="w-full truncate font-medium">{project.artist}</span>
-                  )}
-                </button>
-              );
-            });
-          })()}
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => jumpToCaption(i)}
+                disabled={isActive}
+                style={{ width: ITEM_WIDTH }}
+                className={`text-caption flex shrink-0 flex-col items-center justify-center px-[4px] text-center uppercase transition-colors ${
+                  isActive ? "text-white" : "cursor-pointer text-white/50 hover:text-white/70"
+                }`}
+              >
+                <span className="w-full truncate font-semibold">{project.track}</span>
+                {project.artist && (
+                  <span className="font-artist w-full truncate">{project.artist}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
