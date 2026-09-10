@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { geist, karrik } from "./fonts";
-import Header from "@/components/Header";
-import PageTransitionProvider from "@/components/PageTransition";
-import HomeAppearanceProvider from "@/components/HomeAppearance";
-import WorkFilterProvider from "@/components/WorkFilter";
 import { getSiteMeta } from "@/lib/sanity";
-import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteMeta();
@@ -20,6 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Bare on purpose — this wraps BOTH the public site (see (site)/layout.tsx
+// for its header/providers/Tailwind) and the embedded Sanity Studio at
+// /studio, which needs a clean slate rather than the site's own CSS reset
+// and chrome bleeding into its UI.
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,16 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} ${karrik.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <PageTransitionProvider>
-          <HomeAppearanceProvider>
-            <WorkFilterProvider>
-              <Header />
-              {children}
-            </WorkFilterProvider>
-          </HomeAppearanceProvider>
-        </PageTransitionProvider>
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

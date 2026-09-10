@@ -12,9 +12,15 @@
     "@mux/mux-video-react": "^0.31.2",
     "@sanity/client": "^7.24.0",
     "@sanity/image-url": "^2.1.1",
+    "@sanity/orderable-document-list": "^2.0.23",
+    "@sanity/vision": "^6.13.1",
     "next": "16.2.11",
+    "next-sanity": "^13.3.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sanity": "^6.13.1",
+    "sanity-plugin-mux-input": "^5.0.12",
+    "styled-components": "^6.5.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
