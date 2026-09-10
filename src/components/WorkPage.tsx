@@ -32,7 +32,6 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
       clearTimeout(swapTimeout);
       clearTimeout(fadeOutTimeout);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const filteredProjects =

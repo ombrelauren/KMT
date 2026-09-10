@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import TransitionLink from "@/components/TransitionLink";
 import { useTransitionNavigate } from "@/components/PageTransition";
 import { useHomeAppearance } from "@/components/HomeAppearance";
-import { useSetWorkFilter, useWorkFilter, type WorkFilterValue } from "@/components/WorkFilter";
+import { useSetWorkFilter, type WorkFilterValue } from "@/components/WorkFilter";
 import type { ProjectCategory } from "@/data/projects";
 
 // Keep in sync with --spacing-page in src/app/globals.css.
@@ -25,7 +25,6 @@ export default function Header() {
   const pathname = usePathname();
   const navigate = useTransitionNavigate();
   const { headerColor } = useHomeAppearance();
-  const filter = useWorkFilter();
   const setFilter = useSetWorkFilter();
   const isHomePage = pathname === "/";
   const isWorkPage = pathname === "/work";

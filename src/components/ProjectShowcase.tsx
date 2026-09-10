@@ -84,6 +84,10 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
 
     const startLeft = track.scrollLeft;
     const delta = targetLeft - startLeft;
+    // animateScrollTo only ever runs from an event handler (wheel/click via
+    // shiftBy), never during render — the purity lint can't see that from
+    // here, since the function is merely defined in the component body.
+    // eslint-disable-next-line react-hooks/purity
     const startTime = performance.now();
 
     const step = (now: number) => {

@@ -44,7 +44,6 @@ export const publishAllProjectsAction: DocumentActionComponent = (props) => {
         for (const draftId of draftIds) {
           const publishedId = draftId.replace(/^drafts\./, '')
           try {
-            // eslint-disable-next-line no-await-in-loop
             await client.action({
               actionType: 'sanity.action.document.publish',
               draftId,
