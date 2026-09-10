@@ -4,16 +4,21 @@ import Header from "@/components/Header";
 import PageTransitionProvider from "@/components/PageTransition";
 import HomeAppearanceProvider from "@/components/HomeAppearance";
 import WorkFilterProvider from "@/components/WorkFilter";
+import { getSiteMeta } from "@/lib/sanity";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "KMT",
-    template: "%s — KMT",
-  },
-  description:
-    "KMT is a production studio working across music videos, films, and photography, producing projects throughout Europe and the SWANA region.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteMeta();
+  return {
+    title: {
+      default: site.title,
+      template: `%s — ${site.title}`,
+    },
+    description:
+      "KMT is a production studio working across music videos, films, and photography, producing projects throughout Europe and the SWANA region.",
+    icons: site.faviconUrl ? { icon: site.faviconUrl } : undefined,
+  };
+}
 
 export default function RootLayout({
   children,

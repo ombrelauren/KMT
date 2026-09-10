@@ -3,6 +3,7 @@ import { createImageUrlBuilder } from "@sanity/image-url";
 import type {
   DescriptionBlock,
   HomeCover,
+  MediaBlock,
   MediaRow,
   Project,
   ProjectCategory,
@@ -24,15 +25,6 @@ export function urlFor(source: unknown) {
   return builder.image(source as never);
 }
 
-export function fileUrlFor(asset: { asset?: { _ref?: string } } | undefined) {
-  const ref = asset?.asset?._ref;
-  if (!ref) return null;
-  // file asset refs look like: file-<id>-<extension>
-  const [, id, extension] = ref.match(/^file-([a-f0-9]+)-(\w+)$/) ?? [];
-  if (!id || !extension) return null;
-  return `https://cdn.sanity.io/files/idmbo52t/production/${id}.${extension}`;
-}
-
 // Image asset refs encode their real pixel dimensions — image-<id>-<w>x<h>-<ext>
 // — so the width/height ratio is known upfront, with no extra request.
 function imageAspectRatioFor(asset: { asset?: { _ref?: string } } | undefined) {
@@ -51,8 +43,8 @@ type RawMediaItem =
   | {
       _type: "mediaVideo";
       width: "full" | "half";
-      asset?: { _ref?: string };
       controls?: boolean;
+      playbackId?: string;
     };
 
 type RawDescriptionBlock =
@@ -68,7 +60,7 @@ type RawProject = {
   categories: ProjectCategory[];
   coverImage: unknown;
   homeCoverType?: "image" | "video";
-  homeCoverVideo?: { asset?: { _ref?: string } };
+  homeCoverVideoPlaybackId?: string;
   homeCoverImage?: unknown;
   media?: RawMediaItem[];
   description?: RawDescriptionBlock[];
@@ -78,8 +70,8 @@ type RawProject = {
 
 const projectFields = `
   artist, track, year, categories, coverImage, slug,
-  homeCoverType, homeCoverVideo, homeCoverImage,
-  media[]{ _type, width, asset, controls },
+  homeCoverType, "homeCoverVideoPlaybackId": homeCoverVideo.asset->playbackId, homeCoverImage,
+  media[]{ _type, width, asset, controls, "playbackId": video.asset->playbackId },
   description[]{ _type, label, value, text },
   homeHeaderColor, homeCaptionColor
 `;
@@ -88,7 +80,7 @@ function resolveHomeCover(raw: RawProject): HomeCover {
   if (raw.homeCoverType === "image") {
     return { type: "image", src: urlFor(raw.homeCoverImage).width(1600).height(900).url() };
   }
-  return { type: "video", src: fileUrlFor(raw.homeCoverVideo) ?? "" };
+  return { type: "video", playbackId: raw.homeCoverVideoPlaybackId ?? "" };
 }
 
 function resolveDescription(blocks: RawDescriptionBlock[] | undefined): DescriptionBlock[] {
@@ -103,48 +95,40 @@ function resolveDescription(blocks: RawDescriptionBlock[] | undefined): Descript
 // The flat list of items from Sanity is grouped into rows for rendering:
 // a "full" item is its own row; two consecutive "half" items pair up into
 // one side-by-side row; a lone trailing "half" renders alone at 50% width.
+function toMediaBlock(item: RawMediaItem): MediaBlock {
+  if (item._type === "mediaVideo") {
+    return {
+      type: "video",
+      playbackId: item.playbackId ?? "",
+      width: item.width,
+      controls: item.controls ?? true,
+    };
+  }
+  return {
+    type: "image",
+    src: urlFor(item).url(),
+    width: item.width,
+    aspectRatio: imageAspectRatioFor(item),
+  };
+}
+
 function groupMedia(rawItems: RawMediaItem[] | undefined): MediaRow[] {
   if (!rawItems) return [];
-  // Media items created before the mediaImage/mediaVideo schema switch to
-  // native image/file types have no `asset` ref under the new shape — skip
-  // them rather than crash the whole page.
-  const items = rawItems.filter((item) => item.asset?._ref);
+  // Skip items with nothing to actually render — a mediaImage with no
+  // asset ref, or a mediaVideo whose Mux asset isn't ready/set yet —
+  // rather than crash the whole page.
+  const items = rawItems.filter((item) =>
+    item._type === "mediaVideo" ? Boolean(item.playbackId) : Boolean(item.asset?._ref),
+  );
   const rows: MediaRow[] = [];
   let i = 0;
 
   while (i < items.length) {
     const item = items[i];
-    const block =
-      item._type === "mediaVideo"
-        ? {
-            type: "video" as const,
-            src: fileUrlFor(item) ?? "",
-            width: item.width,
-            controls: item.controls ?? true,
-          }
-        : {
-            type: "image" as const,
-            src: urlFor(item).url(),
-            width: item.width,
-            aspectRatio: imageAspectRatioFor(item),
-          };
+    const block = toMediaBlock(item);
 
     if (item.width === "half" && items[i + 1]?.width === "half") {
-      const next = items[i + 1];
-      const nextBlock =
-        next._type === "mediaVideo"
-          ? {
-              type: "video" as const,
-              src: fileUrlFor(next) ?? "",
-              width: next.width,
-              controls: next.controls ?? true,
-            }
-          : {
-              type: "image" as const,
-              src: urlFor(next).url(),
-              width: next.width,
-              aspectRatio: imageAspectRatioFor(next),
-            };
+      const nextBlock = toMediaBlock(items[i + 1]);
       rows.push([block, nextBlock]);
       i += 2;
     } else {
@@ -208,6 +192,21 @@ export type AboutContent = {
 };
 
 const emptyContact: Contact = { name: "", email: "" };
+
+export type SiteMeta = { title: string; faviconUrl: string | null };
+
+// Used by generateMetadata in layout.tsx — the browser tab's title and icon,
+// editable from Sanity instead of hardcoded, same idea as everything else.
+export async function getSiteMeta(): Promise<SiteMeta> {
+  const site = await sanityClient.fetch<{siteTitle?: string; favicon?: unknown} | null>(
+    `*[_type == "siteSettings"][0]{siteTitle, favicon}`,
+  );
+
+  return {
+    title: site?.siteTitle || "KMT",
+    faviconUrl: site?.favicon ? urlFor(site.favicon).width(64).height(64).url() : null,
+  };
+}
 
 export async function getAboutContent(): Promise<AboutContent> {
   const about = await sanityClient.fetch<{

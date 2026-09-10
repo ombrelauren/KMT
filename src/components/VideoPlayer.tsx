@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import MuxVideo from "@mux/mux-video-react";
 
 const DEFAULT_VOLUME = 0.25;
 
 export default function VideoPlayer({
-  src,
+  playbackId,
   fit = "cover",
 }: {
-  src: string;
+  playbackId: string;
   // "cover" fills its container edge-to-edge, cropping top/bottom as needed.
   // "natural" instead renders at the video's own aspect ratio, full width,
   // however tall that makes it — nothing ever gets cropped; the controls
@@ -226,9 +227,9 @@ export default function VideoPlayer({
         if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
       }}
     >
-      <video
+      <MuxVideo
         ref={videoRef}
-        src={src}
+        playbackId={playbackId}
         className={fit === "cover" ? "absolute inset-0 h-full w-full object-cover" : "block h-auto w-full"}
         loop
         playsInline

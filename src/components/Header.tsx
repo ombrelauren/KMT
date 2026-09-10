@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import TransitionLink from "@/components/TransitionLink";
+import { useTransitionNavigate } from "@/components/PageTransition";
 import { useHomeAppearance } from "@/components/HomeAppearance";
 import { useSetWorkFilter, useWorkFilter, type WorkFilterValue } from "@/components/WorkFilter";
 import type { ProjectCategory } from "@/data/projects";
@@ -22,6 +23,7 @@ const FILTERS: { label: string; value: WorkFilterValue }[] = [
 
 export default function Header() {
   const pathname = usePathname();
+  const navigate = useTransitionNavigate();
   const { headerColor } = useHomeAppearance();
   const filter = useWorkFilter();
   const setFilter = useSetWorkFilter();
@@ -30,15 +32,21 @@ export default function Header() {
   const isProjectPage = /^\/work\/[^/]+$/.test(pathname ?? "");
   // Home and individual project pages show media edge-to-edge behind the
   // header, so they need light/dark text rather than the plain dark text
-  // used everywhere else (which has a solid white page background). On the
-  // home page specifically, each project can choose white or black text to
-  // match its own cover video.
-  const isHome = isProjectPage || (isHomePage ? headerColor === "white" : false);
+  // used everywhere else (which has a solid white page background). The
+  // Work page always gets the light treatment too (its own background is
+  // solid black — see WorkPage.tsx). On the home page specifically, each
+  // project can choose white or black text to match its own cover video.
+  const showWhiteHeader =
+    isProjectPage || isWorkPage || (isHomePage ? headerColor === "white" : false);
+  const navLinkClass = `text-nav uppercase transition-colors ${
+    showWhiteHeader ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
+  }`;
 
   return (
-    // Always transparent — on Work/About the white page background behind
-    // it already does the job, so painting our own white fill here just
-    // causes a premature white flash during page transitions.
+    // Always transparent — on About the white page background behind it
+    // already does the job, and on Work the page itself paints its own
+    // black background — so painting our own fill here would just cause a
+    // premature flash during page transitions.
     <header className="fixed inset-x-0 top-0 z-30 flex w-full items-start py-page bg-transparent">
       <div className="relative flex w-full items-start justify-between px-page">
         {/* -mt-[10px]: the logo mark sits low within its own 44px box, so
@@ -51,42 +59,43 @@ export default function Header() {
             width={LOGO_SIZE}
             height={LOGO_SIZE}
             priority
-            className={isHome ? "invert-0" : "invert"}
+            className={showWhiteHeader ? "invert-0" : "invert"}
           />
         </TransitionLink>
 
-        {isWorkPage && (
-          <nav className="absolute left-1/2 flex -translate-x-1/2 flex-wrap items-center justify-center gap-x-[16px] gap-y-[8px] md:gap-x-[32px]">
-            {FILTERS.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => setFilter(item.value)}
-                className={`text-filter whitespace-nowrap uppercase transition-colors ${
-                  filter === item.value ? "text-black" : "text-zinc-400 hover:text-zinc-600"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        )}
-
         <nav className="flex items-center gap-x-[32px]">
-          <TransitionLink
-            href="/work"
-            className={`text-nav uppercase transition-colors ${
-              isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
-            }`}
-          >
-            Work
-          </TransitionLink>
-          <TransitionLink
-            href="/about"
-            className={`text-nav uppercase transition-colors ${
-              isHome ? "text-white/90 hover:text-white" : "text-black/80 hover:text-black"
-            }`}
-          >
+          {/* Work no longer shows its filters as a permanent row — clicking
+              the link still just goes to /work, but hovering it (desktop
+              only; there's no hover on touch) now reveals them in a
+              dropdown instead, so they don't compete for attention outside
+              the Work page and don't need their own row in the header. */}
+          <div className="group relative">
+            <TransitionLink href="/work" className={navLinkClass}>
+              Work
+            </TransitionLink>
+            {/* pt (not mt) on the wrapper keeps the gap to the dropdown part
+                of its own hoverable box, so moving the cursor straight down
+                from "Work" into the panel below never crosses a dead zone
+                that would drop group-hover along the way. */}
+            <div className="absolute right-0 top-full pt-[16px] opacity-0 transition-opacity duration-150 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto">
+              <div className="flex flex-col items-end gap-y-[8px] whitespace-nowrap py-[12px]">
+                {FILTERS.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => {
+                      setFilter(item.value);
+                      navigate("/work");
+                    }}
+                    className="text-filter cursor-pointer uppercase text-white"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <TransitionLink href="/about" className={navLinkClass}>
             About
           </TransitionLink>
         </nav>

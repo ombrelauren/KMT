@@ -53,12 +53,14 @@
      text-credits   → project page credits panel
      text-hover     → Work page hover overlay (title/artist/year)
 
-   All seven default to Geist (the main typeface). Artist names use a
-   second typeface, Karrik, instead — add the `font-artist` class (defined
-   right after these, so it reliably wins over whichever text-* class is
-   also on that element) on top of the usual text-caption/text-hover class
-   for those specific spans. Karrik only ships one weight (Regular), so
-   font-artist always requests 400 regardless of the surrounding weight.
+   All seven default to Geist (the main typeface). Artist/credit names use
+   a second typeface, Karrik, instead — add the matching `font-artist-*`
+   class (font-artist-caption, font-artist-hover, font-artist-credits;
+   defined right after these, so it reliably wins over whichever text-*
+   class is also on that element) on top of the usual text-caption/
+   text-hover/text-credits class for those specific spans. Karrik only
+   ships one weight (Regular), so these always request 400 regardless of
+   the surrounding weight.
    ============================================================================ */
 
 :root {
@@ -111,11 +113,14 @@
   --typo-hover-tracking: 0.025em;
   --typo-hover-weight: 500;
 
-  /* Artist name scale (Karrik). Karrik's letters sit visually smaller than
-     Geist's at the same pixel size, so this scales the artist name's
-     font-size up relative to whatever size it inherits (text-caption or
-     text-hover) to match the track title's height. 1 = no change. */
-  --typo-artist-scale: 1.1;
+  /* Artist/credit name scale (Karrik). Karrik's letters sit visually
+     smaller than Geist's at the same pixel size, so each of these scales
+     that name's font-size up relative to whatever size it inherits, to
+     match the surrounding Geist text's height. 1 = no change. One value
+     per spot so each can be tuned independently. */
+  --typo-artist-scale-caption: 1.1; /* home page caption */
+  --typo-artist-scale-hover: 1; /* Work page hover overlay */
+  --typo-artist-scale-credits: 1.1; /* project page credits panel */
 }
 
 @utility text-heading {
@@ -174,15 +179,28 @@
   font-weight: var(--typo-hover-weight);
 }
 
-/* Artist names only. Declared after the text-* utilities above on purpose:
-   within Tailwind's utilities layer, a later rule wins a tie between two
-   single-class selectors, so putting this class alongside e.g. text-hover
-   on the same element reliably overrides just its font/weight, leaving
-   that family's size/leading/tracking untouched. */
-@utility font-artist {
+/* Artist/credit names only, one utility per spot (own scale each, see
+   --typo-artist-scale-* above). Declared after the text-* utilities above
+   on purpose: within Tailwind's utilities layer, a later rule wins a tie
+   between two single-class selectors, so putting one of these alongside
+   e.g. text-hover on the same element reliably overrides just its
+   font/weight/size, leaving that family's leading/tracking untouched. */
+@utility font-artist-caption {
   font-family: var(--font-karrik);
   font-weight: 400;
-  font-size: calc(1em * var(--typo-artist-scale));
+  font-size: calc(1em * var(--typo-artist-scale-caption));
+}
+
+@utility font-artist-hover {
+  font-family: var(--font-karrik);
+  font-weight: 400;
+  font-size: calc(1em * var(--typo-artist-scale-hover));
+}
+
+@utility font-artist-credits {
+  font-family: var(--font-karrik);
+  font-weight: 400;
+  font-size: calc(1em * var(--typo-artist-scale-credits));
 }
 
 /* ============================================================================

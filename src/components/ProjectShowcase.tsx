@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import { useTransitionNavigate } from "@/components/PageTransition";
 import { useSetHomeAppearance } from "@/components/HomeAppearance";
+import MuxVideo from "@mux/mux-video-react";
 
 // How many slides on either side of the active one keep their video loaded.
 // Everything outside this window renders no <video> at all, so we're never
@@ -27,7 +28,8 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
   const scrollEndTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollAnimationRef = useRef<number | null>(null);
   const wheelAccumRef = useRef(0);
-  const wheelLockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wheelLockedRef = useRef(false);
+  const wheelIdleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRoundedRef = useRef<number>(0);
   const [activeAbsoluteIndex, setActiveAbsoluteIndex] = useState(0);
   // While a caption-click jump is animating, the scroll handler's own index
@@ -141,11 +143,30 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
     // gesture. So instead of tracking the wheel continuously, each gesture
     // just accumulates until it crosses a threshold, then triggers one
     // animated step to the next/previous project (the same animation the
-    // caption clicks use) and locks out further steps until it's done.
+    // caption clicks use) and locks out further steps until the gesture
+    // truly ends.
+    //
+    // A trackpad flick doesn't fire one wheel event — it fires a burst of
+    // many, decelerating over up to ~1s of momentum scrolling. A lock with a
+    // fixed duration (the previous approach) could expire while that same
+    // flick's tail was still arriving, so the tail end got misread as a
+    // second, brand new gesture and advanced an extra project. Instead, the
+    // lock is released only after a real pause in wheel events (no event for
+    // WHEEL_IDLE_MS) — every event during the burst pushes that release back
+    // out, so the whole flick (however long its tail) stays locked to a
+    // single step, however long it drags on.
+    const WHEEL_IDLE_MS = 150;
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY === 0) return;
       e.preventDefault();
-      if (wheelLockRef.current) return;
+
+      if (wheelIdleTimeoutRef.current) clearTimeout(wheelIdleTimeoutRef.current);
+      wheelIdleTimeoutRef.current = setTimeout(() => {
+        wheelLockedRef.current = false;
+        wheelAccumRef.current = 0;
+      }, WHEEL_IDLE_MS);
+
+      if (wheelLockedRef.current) return;
 
       wheelAccumRef.current += e.deltaY;
       const THRESHOLD = 60;
@@ -154,9 +175,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
       const direction = wheelAccumRef.current > 0 ? 1 : -1;
       wheelAccumRef.current = 0;
       shiftBy(direction);
-      wheelLockRef.current = setTimeout(() => {
-        wheelLockRef.current = null;
-      }, 550);
+      wheelLockedRef.current = true;
     };
 
     const handleScroll = () => {
@@ -198,7 +217,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
       window.removeEventListener("resize", handleResize);
       if (scrollEndTimeout.current) clearTimeout(scrollEndTimeout.current);
       if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
-      if (wheelLockRef.current) clearTimeout(wheelLockRef.current);
+      if (wheelIdleTimeoutRef.current) clearTimeout(wheelIdleTimeoutRef.current);
       if (previousIndexTimeoutRef.current) clearTimeout(previousIndexTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,8 +255,8 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                   className="object-cover"
                 />
               ) : (
-                <video
-                  src={project.homeCover.src}
+                <MuxVideo
+                  playbackId={project.homeCover.playbackId}
                   className="absolute inset-0 h-full w-full object-cover"
                   autoPlay
                   muted
@@ -306,7 +325,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
               >
                 <span className="w-full truncate font-semibold">{project.track}</span>
                 {project.artist && (
-                  <span className="font-artist w-full truncate">{project.artist}</span>
+                  <span className="font-artist-caption w-full truncate">{project.artist}</span>
                 )}
               </button>
             );

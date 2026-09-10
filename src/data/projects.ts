@@ -3,15 +3,23 @@
 
 export type ProjectCategory = "music-video" | "film" | "commercial" | "photography";
 
-export type MediaBlock = {
-  type: "image" | "video";
-  src: string;
-  width: "full" | "half";
-  controls?: boolean;
-  // Known upfront for images (read straight from the Sanity asset ref).
-  // Unknown for video until the player reads its real dimensions.
-  aspectRatio?: number;
-};
+// Videos are hosted on Mux (compressed, adaptive streaming) instead of
+// sitting on Sanity's CDN as an uncompressed file — src (image) vs
+// playbackId (video, fed to @mux/mux-video-react) aren't interchangeable.
+export type MediaBlock =
+  | {
+      type: "image";
+      src: string;
+      width: "full" | "half";
+      // Known upfront, read straight from the Sanity asset ref.
+      aspectRatio?: number;
+    }
+  | {
+      type: "video";
+      playbackId: string;
+      width: "full" | "half";
+      controls?: boolean;
+    };
 
 // A row rendered on the project page. A single block = full width (100%).
 // Two blocks = side by side, 50/50.
@@ -24,7 +32,7 @@ export type DescriptionBlock =
 
 export type TextColor = "white" | "black";
 
-export type HomeCover = { type: "image" | "video"; src: string };
+export type HomeCover = { type: "image"; src: string } | { type: "video"; playbackId: string };
 
 export type Project = {
   slug: string;

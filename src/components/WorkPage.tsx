@@ -41,11 +41,11 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
       : projects.filter((project) => project.categories.includes(displayedFilter));
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black">
       <div className="relative z-0 grid grid-cols-1 md:grid-cols-3">
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-0 z-10 bg-white transition-opacity ${
+          className={`pointer-events-none absolute inset-0 z-10 bg-black transition-opacity ${
             flashing ? "opacity-100" : "opacity-0"
           }`}
           style={{ transitionDuration: `${FADE_MS}ms` }}
@@ -69,7 +69,7 @@ export default function WorkPage({ projects }: { projects: Project[] }) {
                 {project.track}
               </p>
               {project.artist && (
-                <p className="text-hover font-artist uppercase text-white">
+                <p className="text-hover font-artist-hover uppercase text-white">
                   {project.artist}
                 </p>
               )}

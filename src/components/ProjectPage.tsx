@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { Project } from "@/data/projects";
 import VideoPlayer from "@/components/VideoPlayer";
+import MuxVideo from "@mux/mux-video-react";
 
 const SIXTEEN_BY_NINE = 16 / 9;
 
@@ -39,11 +40,11 @@ export default function ProjectPage({ project }: { project: Project }) {
 
             if (block.type === "video") {
               return block.controls ? (
-                <VideoPlayer key={rowIndex} src={block.src} fit="natural" />
+                <VideoPlayer key={rowIndex} playbackId={block.playbackId} fit="natural" />
               ) : (
-                <video
+                <MuxVideo
                   key={rowIndex}
-                  src={block.src}
+                  playbackId={block.playbackId}
                   className="block h-auto w-full bg-black"
                   autoPlay
                   muted
@@ -82,10 +83,10 @@ export default function ProjectPage({ project }: { project: Project }) {
                   >
                     {block.type === "video" ? (
                       block.controls ? (
-                        <VideoPlayer src={block.src} fit="cover" />
+                        <VideoPlayer playbackId={block.playbackId} fit="cover" />
                       ) : (
-                        <video
-                          src={block.src}
+                        <MuxVideo
+                          playbackId={block.playbackId}
                           className="absolute inset-0 h-full w-full object-cover"
                           autoPlay
                           muted
@@ -133,7 +134,7 @@ export default function ProjectPage({ project }: { project: Project }) {
             return (
               <Fragment key={i}>
                 <span>{block.label}</span>
-                <span>{block.value}</span>
+                <span className="font-artist-credits">{block.value}</span>
               </Fragment>
             );
           })}
